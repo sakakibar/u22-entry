@@ -2,6 +2,11 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
+//コンポーネント
+import { Header } from "../components/Header";
+import { Nav } from "../components/Nav";
+import { Footer } from "../components/Footer";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -24,10 +29,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        {/* コンポーネント部分 */}
+        <Header />
+        <Nav />
+        <main style={{ padding: "1rem", minHeight: "80vh" }}>
+          {children}
+        </main>
+        <Footer />
       </body>
     </html>
   );

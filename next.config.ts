@@ -5,3 +5,10 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
+// next.config.jsを使用しない。
+module.exports = {
+  experimental: {
+    turbo: false,
+  },
+};
