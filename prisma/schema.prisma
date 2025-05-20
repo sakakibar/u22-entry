@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/lib/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+
+model users {
+  userID     String   @id @default(cuid())
+  username   String
+  mail       String   @unique
+  password   String
+  age        Int?
+  gender     String?
+  icon       String?
+  bio        String?
+  created_at DateTime @default(now())
+
+  diaries    diaries[]
+}
+
+model diaries {
+  diaryID    String   @id @default(cuid()) 
+  poster     String
+  title      String
+  score      String?
+  weather    String?
+  people     String?
+  hobby      String?
+  mood       String?
+  content    String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user       users    @relation(fields: [poster], references: [userID])
+  musics     musics[]
+}
+
+model musics {
+  musicID         String   @id @default(cuid())
+  title           String
+  music_url       String
+  generation_type String?
+  parameters      String?
+  created_at      DateTime @default(now())
+
+  diary           diaries  @relation(fields: [title], references: [diaryID])
+}
