@@ -1,9 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  experimental: {
-    // turboは推奨されてないので空にするか削除推奨
-  },
+  // 必要に応じて設定を追加してください
 };
 
 export default nextConfig;
