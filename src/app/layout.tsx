@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import  styles from "./layout.module.css";
 
 //コンポーネント
 import { Header } from "../components/Header";
-import { Nav } from "../components/Nav";
 import { Footer } from "../components/Footer";
 
 const geistSans = Geist({
@@ -31,11 +31,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {/* コンポーネント部分 */}
-        <Header />
-        <Nav />
-        <main style={{ padding: "1rem", minHeight: "80vh" }}>
-          {children}
-        </main>
+        <div className={styles.layoutWrapper}>
+          <Header />
+          <main className={styles.mainContent}>{children}</main>
+        </div>
         <Footer />
       </body>
     </html>

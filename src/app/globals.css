@@ -1,15 +1,70 @@
 @import "tailwindcss";
 
+/* CSSを初期化 */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+
+/* HTML5要素の初期化 */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, main, menu, nav, section {
+  display: block;
+}
+
+/* bodyとhtmlの基本設定 */
+html, body {
+  height: 100%;
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans, Arial, Helvetica, sans-serif);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+}
+
+/* mainの共通スタイル */
+main {
+  background-color: #fff;
+  color: #000;
+}
+
+/* リストの初期化 */
+ol, ul {
+  list-style: none;
+}
+
+/* テーブルの初期化 */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* リンクの初期化 */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* 画像の最大幅 */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* CSS変数の定義 */
 :root {
   --background: #ffffff;
   --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: 'Geist', Arial, Helvetica, sans-serif;
+  --font-mono: 'Geist Mono', monospace;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -19,25 +74,41 @@
   }
 }
 
-.body {
-  background: var(--background);
-  background-color: #fff;
-  /* color: var(--foreground); */
-  color: #0a0a0a;
-  font-family: Arial, Helvetica, sans-serif;
-}
 
-.button {
-  background-color: #4CAF50;
+
+/* --------------------------------------------------------------------------------------------------- */
+
+
+
+/* ボタン共通スタイル */
+/* .button {
+  background-color: #88c189;
   color: white;
   border: none;
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1.2rem;
   font-size: 1rem;
-  border-radius: 6px;
+  font-weight: 500;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .button:hover {
-  background-color: #45a049;
+  background-color: #6dab70;
 }
+
+.button:active {
+  transform: scale(0.98);
+}
+
+.button:focus {
+  outline: 2px solid #4c9a4c;
+  outline-offset: 2px;
+}
+
+.button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+} */

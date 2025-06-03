@@ -10,7 +10,12 @@ export default function LoginModal({ onClose, onRegister }: LoginModalProps) {
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={e => e.stopPropagation()}>
         <h2>ログイン</h2>
-        {/* ログインフォームやSNSログインボタンなど */}
+        {/* ログインフォーム(仮) */}
+        <form className={styles.form}>
+          <input type="email" placeholder="メールアドレス" required />
+          <input type="password" placeholder="パスワード" required />
+          <button className="button" type="submit">ログイン</button>
+        </form>
         <button onClick={onClose}>閉じる</button>
         <p className={styles.registerText}>
           アカウントをお持ちでない方は{" "}

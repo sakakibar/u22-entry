@@ -19,6 +19,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(diary);
   } catch (error) {
+    console.error('Diary POST error:', error);
     return NextResponse.json({ error: 'エラーが発生しました' }, { status: 500 });
   }
 }

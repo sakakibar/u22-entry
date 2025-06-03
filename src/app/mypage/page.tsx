@@ -1,13 +1,13 @@
 import Link from 'next/link';
+import styles from './MyPage.module.css';
 
 export default function Home() {
   return (
-    <main>
-      <h1>My page</h1>
-      <Link href="/mypage">マイページへ</Link>
+    <main className={styles.container}>
+      <h1 className={styles.title}>My page</h1>
       <br />
       <Link href="/profile/edit">
-        <button>プロフィール編集</button>
+        <button className="button">プロフィール編集</button>
       </Link>
     </main>
   );
