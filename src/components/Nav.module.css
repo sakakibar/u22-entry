@@ -11,8 +11,37 @@
 }
 
 .li{
+  font-size: 1.2rem;
   height: 50px;
   line-height: 50px;
+  color: #544739;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.li:hover{
+  color: #a4c3a6;
+}
+
+.active{
+  color: #a4c3a6;
+}
+
+.linkContent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+
+/* アイコン */
+.icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
 }
 
 .loginIcon {

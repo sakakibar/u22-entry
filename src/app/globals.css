@@ -1,4 +1,6 @@
+/* fullcalendarのデフォルトのスタイル */
 @import "tailwindcss";
+
 
 /* CSSを初期化 */
 *,
@@ -32,8 +34,8 @@ html, body {
 
 /* mainの共通スタイル */
 main {
-  background-color: #fff;
-  color: #000;
+  background-color: #ffffff;
+  color: #544739;
 }
 
 /* リストの初期化 */
@@ -80,35 +82,48 @@ img {
 
 
 
-/* ボタン共通スタイル */
-/* .button {
-  background-color: #88c189;
-  color: white;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  font-size: 1rem;
-  font-weight: 500;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.container {
+  /* padding: 2rem; */
+  /* background-color: #fff; */
+  min-height: 100vh;
 }
 
-.button:hover {
-  background-color: #6dab70;
+/* h1の共通スタイル */
+.title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
 }
 
-.button:active {
-  transform: scale(0.98);
+/* h2の共通スタイル */
+.heading2 {
+  border-bottom: 1px dashed #544739;
+  padding-bottom: 0.3em;
+  margin: 1em 1em 2em 1em;
 }
 
-.button:focus {
-  outline: 2px solid #4c9a4c;
-  outline-offset: 2px;
+
+
+/* fullcalendar */
+
+/* 前月に移動 */
+.fc-prev-button {
+  background-color: #544739 !important;
+}
+.fc-prev-button:hover {
+  background-color: #3f332a !important;
 }
 
-.button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-  opacity: 0.6;
-} */
+/* 翌月に移動 */
+.fc-next-button {
+  background-color: #544739 !important;
+}
+
+.fc-next-button:hover {
+  background-color: #3f332a !important;
+}
+
+/* 今日のセル */
+.fc-day-today {
+  background-color: rgba(164, 195, 166, 0.5) !important;
+}

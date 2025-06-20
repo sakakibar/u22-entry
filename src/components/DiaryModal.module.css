@@ -1,19 +1,195 @@
-.modalOverlay {
+.overlay {
   position: fixed;
   top: 0;
+  right: 0;
   left: 0;
+  bottom: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0,0,0,0.5);
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   z-index: 1000;
 }
 
-.modalContent {
-  background-color: white;
-  padding: 2rem;
-  border-radius: 10px;
-  width: 300px;
+.modal {
+  position: relative;
+  background-color: #fff;
+  padding: 24px;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  text-align: center;
+}
+
+/* 閉じるボタン */
+.closeIcon {
+  position: absolute;
+  top: 8px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #544739;
+  padding: 0;
+}
+
+.closeIcon:hover {
+  color: #000;
+}
+
+.modal h2{
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px dashed #544739;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.field {
+  margin-bottom: 20px;
+}
+
+.label {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.optionsRow {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.optionItem {
+  cursor: pointer;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  padding: 6px;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.3s ease;
+  user-select: none;
+}
+
+.optionItem:hover {
+  border-color: #a4c3a6;
+}
+
+.selected {
+  border-color: #a4c3a6;
+  /* background-color: #e0f0ff; */
+}
+
+.icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  margin-bottom: 4px;
+}
+
+.optionLabel {
+  font-size: 0.75rem;
+  text-align: center;
+  user-select: none;
+}
+
+.textInput {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 1rem;
+  border: 1.5px solid #544739;
+  border-radius: 6px;
+}
+
+.textInput:focus {
+  outline: none;
+  border-color: #a4c3a6;
+}
+
+.textArea {
+  width: 100%;
+  height: 100px;
+  padding: 8px 12px;
+  font-size: 1rem;
+  border: 1.5px solid #544739;
+  border-radius: 6px;
+  resize: vertical;
+}
+
+.textArea:focus {
+  outline: none;
+  border-color: #a4c3a6;
+}
+
+/* ファイル選択 */
+.labelWithButton {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ＋ボタン */
+.addPhotoButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #544739;
+  color: #fff;
+  font-size: 1.25rem;
+  width: 32px;
+  height: 32px;
+  /* border-radius: 50%; */
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.addPhotoButton:hover {
+  background-color: #3f332a;
+}
+
+/* 「ファイルを選択」を非表示にする */
+.hiddenFileInput {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  font-size: 0;
+}
+
+/* 送信ボタン */
+.button {
+  background-color: #a4c3a6;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+  width: auto;
+  box-sizing: border-box;
+  display: block;
+  margin: 0 auto;
+}
+
+.button:hover {
+  background-color: #a4afa6;
 }
