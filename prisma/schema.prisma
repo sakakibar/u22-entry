@@ -1,16 +1,12 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/lib/prisma"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL")
 }
-
 
 model users {
   userID     String   @id @default(cuid())
@@ -23,11 +19,11 @@ model users {
   bio        String?
   created_at DateTime @default(now())
 
-  diaries    diaries[]
+  diaries    Diary[]  // ここも単数形モデル名に対応
 }
 
-model diaries {
-  diaryID    String   @id @default(cuid()) 
+model Diary {
+  diaryID    String   @id @default(cuid())
   poster     String
   title      String
   score      String?
@@ -51,5 +47,6 @@ model musics {
   parameters      String?
   created_at      DateTime @default(now())
 
-  diary           diaries  @relation(fields: [title], references: [diaryID])
+  diaryID         String
+  diary           Diary    @relation(fields: [diaryID], references: [diaryID])
 }

@@ -1,8 +1,0 @@
--- CreateTable
-CREATE TABLE "Diary" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    "title" TEXT NOT NULL,
-    "content" TEXT NOT NULL,
-    "musicUrl" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-);

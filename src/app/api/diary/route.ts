@@ -3,23 +3,35 @@ import prisma from '@/lib/prisma';
 
 export async function POST(req: NextRequest) {
   try {
-    const { title, content, musicUrl } = await req.json();
+    const { poster, title, content, score, weather, people, hobby, mood } = await req.json();
 
-    if (!title || !content) {
-      return NextResponse.json({ error: 'タイトルと内容は必須です' }, { status: 400 });
+    console.log('poster:', poster);
+
+    if (!poster || poster.trim() === '') {
+      return NextResponse.json(
+          { success: false, error: 'poster（ユーザーID）が必須です' },
+          { status: 400 }
+      );
     }
 
     const diary = await prisma.diary.create({
       data: {
         title,
         content,
-        musicUrl,
+        score,
+        weather,
+        people,
+        hobby,
+        mood,
+        user: {
+          connect: { userID: poster }, // ← 実際のユーザーIDをここにセットしてください
+        },
       },
     });
 
-    return NextResponse.json(diary);
+    return NextResponse.json({ success: true, diary });
   } catch (error) {
-    console.error('Diary POST error:', error);
-    return NextResponse.json({ error: 'エラーが発生しました' }, { status: 500 });
+    console.error(error);
+    return NextResponse.json({ success: false, error: '登録失敗' }, { status: 500 });
   }
 }
