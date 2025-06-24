@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import styles from "./DiaryModal.module.css";
+import styles from "./styles/DiaryModal.module.css";
 import Image from "next/image";
 import {useSession} from "next-auth/react";
 

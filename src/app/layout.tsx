@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import  styles from "./layout.module.css";
-import {Providers} from "@/app/providers";
+import "../styles/globals.css";
+import  styles from "../styles/layout.module.css";
+import {Providers} from "@/app/Providers";
 
 //コンポーネント
 import { Header } from "../components/Header";

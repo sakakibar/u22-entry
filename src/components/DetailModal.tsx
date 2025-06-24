@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './DetailModal.module.css';
+import styles from './styles/DetailModal.module.css';
 
 type ModalProps = {
   dateStr: string;

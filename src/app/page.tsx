@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Calendar } from '../components/Calendar';
-import styles from "./HomePage.module.css";
+import styles from "../styles/HomePage.module.css";
 import DiaryModal from "../components/DiaryModal";
 
 export default function HomePage() {

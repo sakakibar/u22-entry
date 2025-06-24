@@ -5,7 +5,8 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction';
 import jaLocale from '@fullcalendar/core/locales/ja';
-import styles from './Calendar.module.css';
+import styles from './styles/Calendar.module.css';
+// ↑full-calendar自体はglobal.cssでスタイルを管理する
 
 type CalendarProps = {
   onDateSelect: (date: string) => void;

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import styles from "./LoginModal.module.css";
+import styles from "./styles/LoginModal.module.css";
 
 type RegisterModalProps = {
     onClose: () => void;

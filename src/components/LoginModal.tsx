@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn, signOut, useSession } from "next-auth/react"; // ← useSessionを追加
-import styles from "./LoginModal.module.css";
+import styles from "./styles/LoginModal.module.css";
 
 type LoginModalProps = {
   onClose: () => void;

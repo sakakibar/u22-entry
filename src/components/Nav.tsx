@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import LoginModal from "./LoginModal";
 import RegisterModal from "./RegisterModal";
-import styles from "./Nav.module.css";
+import styles from "./styles/Nav.module.css";
 import Image from 'next/image';
 
 
