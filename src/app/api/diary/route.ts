@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma';
 
 export async function POST(req: NextRequest) {
   try {
-    const { poster, title, content, score, weather, people, hobby, mood } = await req.json();
+    const { poster, title, content, score, weather, people, hobby, mood, imageUrl } = await req.json();
 
     console.log('poster:', poster);
 
@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
         people,
         hobby,
         mood,
+        imageUrl,
         user: {
           connect: { userID: poster }, // ← 実際のユーザーIDをここにセットしてください
         },

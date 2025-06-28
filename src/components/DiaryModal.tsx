@@ -3,14 +3,15 @@
 import { useState } from "react";
 import styles from "./styles/DiaryModal.module.css";
 import Image from "next/image";
-import {useSession} from "next-auth/react";
+import { useSession } from "next-auth/react";
+import supabase from "@/lib/supabase";
 
 type Props = {
   onClose: () => void;
 };
 
-export default function DiaryModal({ onClose}: Props) {
-  const {data: session} = useSession();
+export default function DiaryModal({ onClose }: Props) {
+  const { data: session } = useSession();
   const poster = session?.user?.userID;
 
   const [satisfaction, setSatisfaction] = useState<number | null>(null);
@@ -21,6 +22,7 @@ export default function DiaryModal({ onClose}: Props) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -30,11 +32,9 @@ export default function DiaryModal({ onClose}: Props) {
   const hobbyOptions = ["スポーツ", "読書", "音楽", "ゲーム"];
   const emotionOptions = ["嬉しい", "悲しい", "怒り", "楽しい"];
 
-  // ★handleSubmitを async に変更。API送信処理を追加。
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // ★バリデーション追加（posterが無い場合もエラー）
     if (!poster) {
       setError("ログインしていません");
       return;
@@ -55,8 +55,39 @@ export default function DiaryModal({ onClose}: Props) {
     setError(null);
     setLoading(true);
 
+    let imageUrl = null;
+
+    // ✅ 画像がある場合、Storageへアップロード
+    if (imageFile) {
+      const fileExt = imageFile.name.split(".").pop();
+      const fileName = `${poster}_${Date.now()}.${fileExt}`;
+      const filePath = `private/${poster}/${fileName}`;
+
+      // ここでコンソールに情報を出す
+      console.log("アップロード対象のユーザーID(poster):", poster);
+      console.log("アップロードファイル名:", fileName);
+      console.log("アップロードパス:", filePath);
+
+      const { error: uploadError } = await supabase.storage
+          .from("diary-images") // ← バケット名に合わせて変更
+          .upload(filePath, imageFile);
+
+      if (uploadError) {
+        console.error("画像アップロード失敗:", uploadError.message);
+        setError("画像のアップロードに失敗しました");
+        setLoading(false);
+        return;
+      }
+
+      const { data: publicUrlData } = supabase.storage
+          .from("diary-images")
+          .getPublicUrl(filePath);
+      console.log(imageUrl);
+
+      imageUrl = publicUrlData?.publicUrl ?? null;
+    }
+
     try {
-      // ★APIにPOST送信
       const res = await fetch("/api/diary", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -64,11 +95,12 @@ export default function DiaryModal({ onClose}: Props) {
           poster,
           title,
           content,
-          score: satisfaction.toString(), // string型に変換
+          score: satisfaction.toString(),
           weather,
           people,
           hobby,
           mood: emotion,
+          imageUrl,
         }),
       });
 
@@ -76,13 +108,10 @@ export default function DiaryModal({ onClose}: Props) {
 
       if (!res.ok) {
         setError(data.error || "登録に失敗しました");
-        setLoading(false);
         return;
       }
 
       alert("日記を登録しました！");
-
-      // フォームをクリア
       setSatisfaction(null);
       setWeather(null);
       setPeople(null);
@@ -91,9 +120,8 @@ export default function DiaryModal({ onClose}: Props) {
       setTitle("");
       setContent("");
       setPreviewUrl(null);
+      setImageFile(null);
       setError(null);
-
-      // モーダル閉じる
       onClose();
 
     } catch (err) {
@@ -107,12 +135,14 @@ export default function DiaryModal({ onClose}: Props) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewUrl(reader.result as string);
       };
       reader.readAsDataURL(file);
     } else {
+      setImageFile(null);
       setPreviewUrl(null);
     }
   };
