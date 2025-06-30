@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./styles/DiaryModal.module.css";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
@@ -8,11 +8,25 @@ import supabase from "@/lib/supabase";
 
 type Props = {
   onClose: () => void;
+  initialData?: {
+    diaryID: string;
+    title: string;
+    content: string;
+    score: string;
+    weather: string;
+    people: string;
+    hobby: string;
+    mood: string;
+    imageUrl?: string;
+    created_at?: string;
+  };
+  onUpdate?: (updatedDiary: any) => void;
 };
 
-export default function DiaryModal({ onClose }: Props) {
+export default function DiaryModal({ onClose, initialData, onUpdate }: Props) {
   const { data: session } = useSession();
   const poster = session?.user?.userID;
+  const isEditMode = !!initialData;
 
   const [satisfaction, setSatisfaction] = useState<number | null>(null);
   const [weather, setWeather] = useState<string | null>(null);
@@ -32,13 +46,28 @@ export default function DiaryModal({ onClose }: Props) {
   const hobbyOptions = ["スポーツ", "読書", "音楽", "ゲーム"];
   const emotionOptions = ["嬉しい", "悲しい", "怒り", "楽しい"];
 
+  // ⭐ 編集モード：初期データをセット
+  useEffect(() => {
+    if (initialData) {
+      setSatisfaction(Number(initialData.score));
+      setWeather(initialData.weather);
+      setPeople(initialData.people);
+      setHobby(initialData.hobby);
+      setEmotion(initialData.mood);
+      setTitle(initialData.title);
+      setContent(initialData.content);
+      setPreviewUrl(initialData.imageUrl ?? null);
+    }
+  }, [initialData]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!poster) {
+    if (!poster && !isEditMode) {
       setError("ログインしていません");
       return;
     }
+
     if (
         satisfaction === null ||
         !weather ||
@@ -55,21 +84,15 @@ export default function DiaryModal({ onClose }: Props) {
     setError(null);
     setLoading(true);
 
-    let imageUrl = null;
+    let imageUrl = previewUrl;
 
-    // ✅ 画像がある場合、Storageへアップロード
     if (imageFile) {
       const fileExt = imageFile.name.split(".").pop();
       const fileName = `${poster}_${Date.now()}.${fileExt}`;
       const filePath = `private/${poster}/${fileName}`;
 
-      // ここでコンソールに情報を出す
-      console.log("アップロード対象のユーザーID(poster):", poster);
-      console.log("アップロードファイル名:", fileName);
-      console.log("アップロードパス:", filePath);
-
       const { error: uploadError } = await supabase.storage
-          .from("diary-images") // ← バケット名に合わせて変更
+          .from("diary-images")
           .upload(filePath, imageFile);
 
       if (uploadError) {
@@ -82,16 +105,15 @@ export default function DiaryModal({ onClose }: Props) {
       const { data: publicUrlData } = supabase.storage
           .from("diary-images")
           .getPublicUrl(filePath);
-      console.log(imageUrl);
-
       imageUrl = publicUrlData?.publicUrl ?? null;
     }
 
     try {
       const res = await fetch("/api/diary", {
-        method: "POST",
+        method: isEditMode ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          diaryID: initialData?.diaryID,
           poster,
           title,
           content,
@@ -111,19 +133,24 @@ export default function DiaryModal({ onClose }: Props) {
         return;
       }
 
-      alert("日記を登録しました！");
-      setSatisfaction(null);
-      setWeather(null);
-      setPeople(null);
-      setHobby(null);
-      setEmotion(null);
-      setTitle("");
-      setContent("");
-      setPreviewUrl(null);
-      setImageFile(null);
-      setError(null);
-      onClose();
+      alert(isEditMode ? "日記を更新しました！" : "日記を登録しました！");
 
+      if (isEditMode && onUpdate) {
+        onUpdate({
+          diaryID: initialData!.diaryID,
+          title,
+          content,
+          score: satisfaction.toString(),
+          weather,
+          people,
+          hobby,
+          mood: emotion,
+          imageUrl,
+          created_at: initialData?.created_at ?? new Date().toISOString(),
+        });
+      }
+
+      onClose();
     } catch (err) {
       console.error(err);
       setError("通信エラーが発生しました");
@@ -148,12 +175,12 @@ export default function DiaryModal({ onClose }: Props) {
   };
 
   return (
-      <div className={styles.overlay} onClick={onClose}>
+  <div className={styles.overlay} onClick={onClose}>
         <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
           <button className={styles.closeIcon} onClick={onClose}>
             ×
           </button>
-          <h2>日記登録フォーム</h2>
+          <h2>{isEditMode ? "日記編集フォーム" : "日記登録フォーム"}</h2>
           <form onSubmit={handleSubmit} className={styles.form}>
             <div className={styles.field}>
               <div className={styles.label}>今日の満足度</div>
@@ -328,7 +355,7 @@ export default function DiaryModal({ onClose }: Props) {
 
             <div className="buttons">
               <button type="submit" className={styles.button} disabled={loading}>
-                {loading ? "登録中..." : "投稿"}
+                {loading ? "登録中..." : isEditMode ? "更新" : "投稿"}
               </button>
             </div>
           </form>

@@ -6,6 +6,7 @@ import styles from "../styles/HomePage.module.css";
 import DiaryModal from "../components/DiaryModal";
 
 type DiaryData = {
+    diaryID: string;
     title: string;
     content: string;
     score?: string;
@@ -19,6 +20,9 @@ type DiaryData = {
 
 
 export default function HomePage() {
+
+    const [editingDiary, setEditingDiary] = useState<DiaryData | null>(null);
+
     // モーダルの表示・非表示を制御
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -40,7 +44,10 @@ export default function HomePage() {
     const [error, setError] = useState<string | null>(null);
 
     // モーダルを開く
-    const openModal = () => setIsModalOpen(true);
+    const openModal = () => {
+        setEditingDiary(null);
+        setIsModalOpen(true);
+    }
 
     // モーダルを閉じる
     const closeModal = () => setIsModalOpen(false);
@@ -48,6 +55,35 @@ export default function HomePage() {
     // 検索バーの入力値が変更されたときの処理
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchQuery(e.target.value);
+    };
+
+    // 削除関数
+    const handleDelete = async (diaryID: string) => {
+        if (!confirm("この日記を削除しますか？")) return;
+
+        try {
+            const res = await fetch("/api/diary", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ diaryID }),
+            });
+            const result = await res.json();
+            if (result.success) {
+                alert("日記を削除しました");
+                setDiaryData(null); // 削除したので詳細表示クリア
+            } else {
+                alert("削除に失敗しました: " + result.error);
+            }
+        } catch (err) {
+            console.error("削除エラー:", err);
+            alert("削除に失敗しました。");
+        }
+    };
+
+    // 編集関数（モーダルに編集対象データを渡して開く）
+    const handleEdit = (data: DiaryData) => {
+        setEditingDiary(data);
+        setIsModalOpen(true);
     };
 
     // 選択された日付が変更されたときに日記データを取得する
@@ -88,6 +124,7 @@ export default function HomePage() {
                 if (matched) {
                     console.log("該当の日付", matched);
                     setDiaryData({
+                        diaryID: matched.diaryID,
                         title: matched.title,
                         content: matched.content,
                         score: matched.score,
@@ -115,6 +152,7 @@ export default function HomePage() {
                 setIsLoading(false);
             });
     }, [selectedDate]);
+
 
     return (
         <main className={styles.pageWrapper}>
@@ -147,7 +185,15 @@ export default function HomePage() {
                     <button className={styles.button} onClick={openModal}>日記登録</button>
 
                     {/* モーダルが開かれていれば表示 */}
-                    {isModalOpen && <DiaryModal onClose={closeModal} />}
+                    {isModalOpen && <DiaryModal onClose={closeModal}
+                                                initialData={editingDiary}
+                                                onUpdate={updatedDiary => {
+                                                    setDiaryData(updatedDiary);
+                                                    setEditingDiary(null);
+                                                    setIsModalOpen(false);
+                                                }}
+
+                    />}
                 </div>
 
                 {/* 右側の日記詳細表示パネル */}
@@ -184,9 +230,18 @@ export default function HomePage() {
                                     <p><strong>感情:</strong> {diaryData.mood}</p>
                                     <p><strong>タイトル:</strong> {diaryData.title}</p>
                                     <p><strong>本文:</strong> {diaryData.content}</p>
+
+                                    {/* 編集・削除ボタン */}
+                                    <div style={{ marginTop: "1rem", display: "flex", gap: "10px" }}>
+                                        <button onClick={() => handleEdit(diaryData)} className={styles.button}>
+                                            編集
+                                        </button>
+                                        <button onClick={() => handleDelete(diaryData.diaryID)} className={styles.button}>
+                                            削除
+                                        </button>
+                                    </div>
                                 </>
                             ) : (
-                                // 日記がない場合のメッセージ
                                 <p>この日に登録された日記はありません。</p>
                             )}
                         </>
