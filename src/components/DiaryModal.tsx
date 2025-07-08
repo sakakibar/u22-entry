@@ -135,9 +135,9 @@ export default function DiaryModal({ onClose, initialData, onUpdate }: Props) {
 
       alert(isEditMode ? "日記を更新しました！" : "日記を登録しました！");
 
-      if (isEditMode && onUpdate) {
+      if (onUpdate) {
         onUpdate({
-          diaryID: initialData!.diaryID,
+          diaryID: data.diaryID ?? initialData?.diaryID ?? "",
           title,
           content,
           score: satisfaction.toString(),

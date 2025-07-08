@@ -38,7 +38,7 @@ export default function LoginModal({ onClose, onRegister }: LoginModalProps) {
     } else {
       alert("ログイン成功！");
       onClose();
-      router.push("/");
+      window.location.reload();
     }
   };
 
@@ -47,7 +47,7 @@ export default function LoginModal({ onClose, onRegister }: LoginModalProps) {
     await signOut({ redirect: false });
     alert("ログアウトしました");
     onClose();
-    router.push("/");
+    window.location.reload();
   };
 
   return (

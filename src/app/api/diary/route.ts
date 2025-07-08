@@ -106,7 +106,11 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({ success: true, diary });
+    return NextResponse.json({
+      success: true,
+      diaryID: diary.diaryID,
+      diary,
+    });
 
   } catch (error) {
     console.error(error);
