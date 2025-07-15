@@ -6,7 +6,7 @@ export const Header = () => {
   return (
     <header className={styles.header}>
       <h1>
-        <Link href="/">音ログ</Link>
+        <Link href="/">Chordia</Link>
       </h1>
       <Nav />
     </header>

@@ -1,10 +1,10 @@
 // import Link from 'next/link';
-// import styles from './MyPage.module.css';
+// import styles from './Setting.module.css';
 
 export default function Home() {
   return (
     <main className="container">
-      <h1 className="title">My page</h1>
+      <h1 className="title">Setting</h1>
       <br />
 
       {/* <Link href="/profile/edit">

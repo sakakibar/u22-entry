@@ -2,9 +2,10 @@
 
 import {useSession} from "next-auth/react";
 import { useState, useEffect } from "react";
-import { Calendar } from '../components/Calendar';
+import { Calendar } from "../components/Calendar";
 import styles from "../styles/HomePage.module.css";
 import DiaryModal from "../components/DiaryModal";
+import Image from 'next/image';
 
 type DiaryData = {
     diaryID: string;
@@ -15,52 +16,32 @@ type DiaryData = {
     people?: string;
     hobby?: string;
     mood?: string;
-    imageUrl?:string;
+    imageUrl?: string;
     created_at?: string;
 };
-
 
 export default function HomePage() {
 
     const {data: session} = useSession();
-
     const [editingDiary, setEditingDiary] = useState<DiaryData | null>(null);
-
-    // モーダルの表示・非表示を制御
     const [isModalOpen, setIsModalOpen] = useState(false);
-
-    // カレンダーで選択された日付（例："2025-06-26"）
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
-
     const [diaryData, setDiaryData] = useState<DiaryData | null>(null);
-
-    // 検索バーに入力された文字列
     const [searchQuery, setSearchQuery] = useState('');
-
-    // 選択された日付の日記データ（タイトルと本文）
-    //const [diaryData, setDiaryData] = useState<{ title: string, content: string } | null>(null);
-
-    // ローディング中かどうかのフラグ
     const [isLoading, setIsLoading] = useState(false);
-
-    // データ取得時のエラーメッセージ
     const [error, setError] = useState<string | null>(null);
 
-    // モーダルを開く
     const openModal = () => {
         setEditingDiary(null);
         setIsModalOpen(true);
-    }
+    };
 
-    // モーダルを閉じる
     const closeModal = () => setIsModalOpen(false);
 
-    // 検索バーの入力値が変更されたときの処理
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchQuery(e.target.value);
     };
 
-    // 削除関数
     const handleDelete = async (diaryID: string) => {
         if (!confirm("この日記を削除しますか？")) return;
 
@@ -73,7 +54,7 @@ export default function HomePage() {
             const result = await res.json();
             if (result.success) {
                 alert("日記を削除しました");
-                setDiaryData(null); // 削除したので詳細表示クリア
+                setDiaryData(null);
             } else {
                 alert("削除に失敗しました: " + result.error);
             }
@@ -83,35 +64,29 @@ export default function HomePage() {
         }
     };
 
-    // 編集関数（モーダルに編集対象データを渡して開く）
     const handleEdit = (data: DiaryData) => {
         setEditingDiary(data);
         setIsModalOpen(true);
     };
 
-    // 選択された日付が変更されたときに日記データを取得する
     useEffect(() => {
-        // 日付が未選択の場合は初期化
         if (!selectedDate) {
             setDiaryData(null);
             return;
         }
 
-        // ローディング開始・エラー初期化
         setIsLoading(true);
         setError(null);
 
-        console.log("選択された日付:", selectedDate);
+        console.log("選択された日付:",  selectedDate);
 
-        // Supabase API経由で日記データを取得
         fetch(`/api/diary/list`)
             .then(res => {
                 if (!res.ok) throw new Error("データ取得失敗");
                 return res.json();
             })
             .then(data => {
-                console.log("全件", data);
-                console.log("取得した日記一覧:", data);
+                console.log("全件",   data);
 
                 const normalizeDate = (input: string | Date): string => {
                     const d = new Date(input);
@@ -121,9 +96,8 @@ export default function HomePage() {
                     return `${yyyy}-${mm}-${dd}`;
                 };
 
-                const matched = data.find(((d: any) => normalizeDate(d.created_at) === selectedDate));
+                const matched = data.find((d: any) => normalizeDate(d.created_at) === selectedDate);
 
-                // 日記データが存在すればセット
                 if (matched) {
                     console.log("該当の日付", matched);
                     setDiaryData({
@@ -140,7 +114,6 @@ export default function HomePage() {
                     });
                 } else {
                     console.log("この日付には日記がありません");
-                    // その日の日記がなければ null
                     setDiaryData(null);
                 }
             })
@@ -148,23 +121,18 @@ export default function HomePage() {
                 if (err.message === "unauthorized") {
                     setError("ログインしてください");
                 } else {
-
+                    setError("日記の取得に失敗しました");
                 }
-                // エラー時の処理
-                console.log("日付の取得に失敗")
-                setError("日記の取得に失敗しました。");
                 setDiaryData(null);
             })
             .finally(() => {
-                // ローディング終了
                 setIsLoading(false);
             });
     }, [selectedDate]);
 
-
     return (
         <main className={styles.pageWrapper}>
-            {/* 🔍 検索バーエリア */}
+            {/* 🔍 検索バーエリア(タグ検索) */}
             <div className={styles.searchBarWrapper}>
                 <input
                     type="text"
@@ -175,19 +143,21 @@ export default function HomePage() {
                 />
                 <button type="submit" className={styles.searchButton} aria-label="検索">
                     {/* 検索アイコン（虫眼鏡） */}
-                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="none" stroke="currentColor"
+                    {/* <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="none" stroke="currentColor"
                          strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                         <circle cx="11" cy="11" r="7"/>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/> */}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="7" />
+                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
                     </svg>
                 </button>
             </div>
 
             {/* 📅 カレンダー + 詳細パネル */}
             <div className={styles.mainContent}>
-                {/* カレンダー表示エリア */}
+                {/* 左：カレンダー表示 */}
                 <div className={styles.calendarSection}>
-                    {/* カレンダーコンポーネント（クリックで日付選択） */}
                     <Calendar onDateSelect={setSelectedDate}/>
 
                     {/* 日記登録モーダルを開くボタン */}
@@ -211,9 +181,21 @@ export default function HomePage() {
                                                     }
                                                 }}
                     />}
+                    {/* モーダル */}
+                    {isModalOpen && (
+                        <DiaryModal
+                            onClose={closeModal}
+                            initialData={editingDiary}
+                            onUpdate={updatedDiary => {
+                                setDiaryData(updatedDiary);
+                                setEditingDiary(null);
+                                setIsModalOpen(false);
+                            }}
+                        />
+                    )}
                 </div>
-
-                {/* 右側の日記詳細表示パネル */}
+{/* 
+                右側の日記詳細表示パネル
                 {session && (
                     <div className={styles.detailPanel}>
                         {selectedDate ? (
@@ -262,7 +244,134 @@ export default function HomePage() {
                             <p>日付を選択すると詳細が表示されます。</p>
                         )}
                     </div>
-                )}
+                )} */}
+                    {/* <Calendar onDateSelect={setSelectedDate} /> */}
+
+                    {/* モーダル
+                    {isModalOpen && (
+                        <DiaryModal
+                            onClose={closeModal}
+                            initialData={editingDiary}
+                            onUpdate={updatedDiary => {
+                                setDiaryData(updatedDiary);
+                                setEditingDiary(null);
+                                setIsModalOpen(false);
+                            }}
+                        />
+                    )} */}
+                {/* </div> */}
+
+                {/* 右：日記詳細パネル */}
+                <div className={styles.detailPanel}>
+                    {selectedDate ? (
+                        <>
+                            <h2>{selectedDate}</h2>
+
+                            {isLoading ? (
+                                <p>読み込み中...</p>
+                            ) : error ? (
+                                <p style={{ color: "red" }}>{error}</p>
+                            ) : diaryData ? (
+                                <>
+                                    {diaryData.imageUrl && (
+                                        <div className={styles.imageWrapper}>
+                                            <Image
+                                                src={diaryData.imageUrl}
+                                                alt="日記画像"
+                                                width={600}
+                                                height={400}
+                                                className={styles.diaryImage}
+                                                onError={(e) => {
+                                                    console.error("画像の読み込みに失敗:", diaryData.imageUrl);
+                                                }}
+                                            />
+                                        </div>
+                                    )}
+                                    <p><strong>満足度:</strong> {diaryData.score}</p>
+                                    <p><strong>天気:</strong> {diaryData.weather}</p>
+                                    <p><strong>人々:</strong> {diaryData.people}</p>
+                                    <p><strong>趣味:</strong> {diaryData.hobby}</p>
+                                    <p><strong>感情:</strong> {diaryData.mood}</p>
+                                    <p><strong>タイトル:</strong> {diaryData.title}</p>
+                                    <p><strong>本文:</strong> {diaryData.content}</p>
+
+                                    <div style={{ marginTop: "1rem", display: "flex", gap: "10px" }}>
+                                        <button
+                                            onClick={() => handleEdit(diaryData)}
+                                            aria-label="編集"
+                                            style={{
+                                                background: "none",
+                                                border: "none",
+                                                padding: 0,
+                                                cursor: "pointer",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                            }}
+                                        >
+                                            {/* 編集アイコン（鉛筆） */}
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width="20"
+                                                height="20"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path d="M12 20h9" />
+                                                <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 12.5-12.5z" />
+                                            </svg>
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(diaryData.diaryID)}
+                                            aria-label="削除"
+                                            style={{
+                                                background: "none",
+                                                border: "none",
+                                                padding: 0,
+                                                cursor: "pointer",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                            }}
+                                        >
+                                            {/* 削除アイコン（ゴミ箱） */}
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width="20"
+                                                height="20"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <polyline points="3 6 5 6 21 6" />
+                                                <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                                                <path d="M10 11v6" />
+                                                <path d="M14 11v6" />
+                                                <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <p>この日に登録された日記はありません。</p>
+                                    <button className={styles.button} onClick={openModal}>
+                                        日記を登録する
+                                    </button>
+                                </>
+                            )}
+                        </>
+                    ) : (
+                        <p>日付を選択すると詳細が表示されます。</p>
+                    )}
+                </div>
             </div>
         </main>
     );

@@ -335,6 +335,19 @@ export default function DiaryModal({ onClose, initialData, onUpdate }: Props) {
                       onChange={handleFileChange}
                   />
                 </label>
+                {/* ごみ箱アイコン */}
+                {previewUrl && (
+                  <button
+                    type="button"
+                    className={styles.trashButton}
+                    onClick={() => {
+                      setPreviewUrl(null) // または setSelectedFile(null) など、状態をリセット
+                    }}
+                  >
+                    <Trash2 size={20} />
+                  </button>
+                )}
+
               </div>
               {previewUrl && (
                   <div className={styles.previewContainer}>

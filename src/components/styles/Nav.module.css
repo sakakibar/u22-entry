@@ -42,18 +42,5 @@
   width: 20px;
   height: 20px;
   flex-shrink: 0;
-}
-
-.loginIcon {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.loginImage {
-  width: auto;
-  height: 35px;
+  overflow: visible;
 }
