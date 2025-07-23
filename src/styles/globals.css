@@ -92,14 +92,16 @@ img {
 .title {
   font-size: 1.8rem;
   font-weight: bold;
-  margin-bottom: 1.5rem;
+  padding: 0 1rem;
+  /* background-color: #0a0a0a; */
 }
 
 /* h2の共通スタイル */
 .heading2 {
   border-bottom: 1px dashed #544739;
+  margin: 1em 1em 0 1em;
   padding-bottom: 0.3em;
-  margin: 1em 1em 2em 1em;
+  /* background-color: #0a0a0a; */
 }
 
 

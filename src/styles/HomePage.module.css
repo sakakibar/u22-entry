@@ -14,50 +14,6 @@
   flex-direction: column;
 }
 
-/* 検索バー */
-.searchBarWrapper {
-  margin: auto 20px;
-  text-align: left;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.searchInput {
-  width: 55%;
-  padding: 10px;
-  font-size: 16px;
-  border: 1px solid #544739;
-  border-radius: 8px;
-  height: 40px;
-  box-sizing: border-box;
-}
-
-/* 検索ボタン */
-.searchButton {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  color: #555;
-  transition: color 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 40px;
-  width: 40px;
-}
-
-.searchButton svg {
-  width: 25px;
-  height: 25px;
-}
-
-.searchButton:hover {
-  color: #000;
-}
-
-
 /* カレンダー＋サイドパネルの横並びレイアウト */
 .mainContent {
   display: flex;
@@ -67,6 +23,7 @@
 /* カレンダーセクション */
 .calendarSection {
   flex: 7;
+  max-width: 70%;
 }
 
 /* サイドパネル */

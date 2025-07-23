@@ -47,6 +47,7 @@ export default function LoginModal({ onClose, onRegister }: LoginModalProps) {
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <button className={styles.closeIcon} onClick={onClose}>×</button>
         <h2>ログイン</h2>
 
         <form className={styles.form} onSubmit={handleSubmit}>
@@ -83,8 +84,6 @@ export default function LoginModal({ onClose, onRegister }: LoginModalProps) {
           </a>{" "}
           から会員登録
         </p>
-
-        <button onClick={onClose}>閉じる</button>
       </div>
     </div>
   );

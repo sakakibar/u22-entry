@@ -138,28 +138,8 @@
 .labelWithButton {
   display: flex;
   align-items: center;
-  gap: 12px;
-}
-
-/* ＋ボタン */
-.addPhotoButton {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #544739;
-  color: #fff;
-  font-size: 1.25rem;
-  width: 32px;
-  height: 32px;
-  /* border-radius: 50%; */
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.addPhotoButton:hover {
-  background-color: #3f332a;
+  gap: 10px;
+  
 }
 
 /* 「ファイルを選択」を非表示にする */
@@ -192,4 +172,37 @@
 
 .button:hover {
   background-color: #a4afa6;
+}
+
+
+.labelWithButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.labelText {
+  font-weight: bold;
+}
+
+.iconLabel {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+}
+
+.trashButton {
+  background: none;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hiddenFileInput {
+  display: none;
 }

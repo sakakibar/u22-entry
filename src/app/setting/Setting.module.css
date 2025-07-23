@@ -1,5 +1,96 @@
-/* .heading2 {
-  border-bottom: 1px solid #333;
-  padding-bottom: 0.3em;
-  margin: 1em;
-} */
+.profileForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin: 1rem 2rem 3rem 2rem;
+  max-width: 50%;
+}
+
+.profileItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* ラベルと入力の間隔 */
+}
+
+.profileItem label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.input {
+  /* width: 100%; */
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.iconPreview {
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 0.5rem;
+}
+
+.accountdelete,.password,.logout{
+  margin: 1rem 2rem 3rem 2rem;
+}
+
+.text{
+  margin-bottom: 0.5rem;
+}
+
+.buttonRow {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-start;
+}
+
+.buttons {
+  background-color: #a4c3a6;
+  color: white;
+  border: none;
+  /* margin-top:0.3em; */
+  padding: 10px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+  width: fit-content;
+}
+
+.buttons:hover {
+  background-color: #a4afa6;
+}
+
+/* キャンセルボタン */
+.cancelButton {
+  border: 1px solid #ccc;
+  color: #ccc;
+  padding: 10px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.cancelButton:hover {
+  background-color: #ccc;
+  border: 1px solid #ccc;
+  color: #fff;
+}
+
+/* アカウント削除ボタン */
+.deleteButton {
+  background-color: #cf7272;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.deleteButton:hover {
+  background-color: #afa4a4;
+}

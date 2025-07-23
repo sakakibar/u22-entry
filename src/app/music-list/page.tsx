@@ -4,7 +4,7 @@ import React from "react";
 export default function MusicListPage() {
   return (
     <div className="container">
-      <h1 className="title">音楽一覧</h1>
+      <h1 className="title">Music List</h1>
     </div>
   );
 }

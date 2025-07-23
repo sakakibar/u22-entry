@@ -78,6 +78,26 @@ export const Nav = () => {
               TagSearch
             </Link>
           </li>
+          <li className={`${styles.li} ${pathname === "/diary-list" ? styles.active : ""}`}>
+            <Link href="/diary-list" className={styles.linkContent}>
+              {/* ノートアイコン */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className={styles.icon}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+                width={20}
+                height={20}
+                aria-hidden="true"
+              >
+                <path d="M4 4h16v16H4z" />
+                <path d="M8 4v16" />
+              </svg>
+              DiaryList
+            </Link>
+          </li>
           <li className={`${styles.li} ${pathname === "/music-list" ? styles.active : ""}`}>
             <Link href="/music-list" className={styles.linkContent}>
               {/* 音符アイコン */}
