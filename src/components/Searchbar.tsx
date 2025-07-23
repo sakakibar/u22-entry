@@ -14,7 +14,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ value, onChange, onSearch 
         <div className={styles.searchBarWrapper}>
             <input
                 type="text"
-                placeholder="タグで検索..."
+                placeholder="検索..."
                 value={value}
                 onChange={onChange}
                 className={styles.searchInput}

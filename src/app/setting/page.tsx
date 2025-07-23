@@ -4,7 +4,7 @@ import { useState } from "react";
 // import Image from "next/image";
 import styles from './Setting.module.css';
 
-export default function Home() {
+export default function SettingPage() {
   const [username, setUsername] = useState("山田太郎");
   const [email, setEmail] = useState("yamada@example.com");
   // const [icon, setIcon] = useState<string | null>(null);

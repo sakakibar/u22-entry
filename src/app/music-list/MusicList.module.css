@@ -1,12 +1,83 @@
-/* .container {
-  padding: 2rem;
-  background-color: #fff;
-  min-height: 100vh;
-} */
+/* セクション全体 */
+.section {
+  margin: 1rem auto 2rem;
+  /* width: 70%; */
+}
 
-/* .title {
-  font-size: 2rem;
+/* セクション見出し */
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
   font-weight: bold;
-  color: #333;
-  margin-bottom: 1.5rem;
-} */
+  font-size: 1.2rem;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  border-bottom: 2px dashed #544739;
+}
+
+.sectionHeader h2 {
+  margin: 0;
+}
+
+/* トラックリスト */
+.list {
+  list-style: none;
+  padding: 0;
+  margin-top: 1rem;
+}
+
+/* 各トラックアイテム */
+.item {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 0.75rem 2rem;
+  border-bottom: 1px dashed #544739;
+}
+
+/* サムネイル画像 */
+.thumbnail {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 3px;
+}
+
+/* 曲タイトル */
+.title {
+  flex-grow: 1;
+  font-size: 1.2rem;
+}
+
+/* アイコンの並び */
+.icons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* 各アイコン */
+.icon {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  stroke: gray;
+  transition: transform 0.2s, stroke 0.2s;
+}
+
+.icon:hover {
+  /* transform: scale(1.2); */
+  stroke: #544739;
+}
+
+/* お気に入りアイコン（選択済） */
+.favorited {
+  stroke: gold;
+  fill: gold;
+}
+
+/* オーディオプレイヤー */
+.audio {
+  margin-top: 0.5rem;
+  width: 100%;
+}
