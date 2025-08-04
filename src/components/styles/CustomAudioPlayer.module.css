@@ -1,0 +1,27 @@
+.player {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.playButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #444;
+}
+
+.progressWrapper {
+  flex: 1;
+  height: 6px;
+  background-color: #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  background-color: #a4c3a6;
+  transition: width 0.2s ease;
+}

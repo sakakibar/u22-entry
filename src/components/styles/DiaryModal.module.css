@@ -1,9 +1,7 @@
+/* モーダル */
 .overlay {
   position: fixed;
-  top: 0;
-  right: 0;
-  left: 0;
-  bottom: 0;
+  top: 0; right: 0; bottom: 0; left: 0;
   width: 100%;
   height: 100%;
   background-color: rgba(0,0,0,0.5);
@@ -17,16 +15,27 @@
   position: relative;
   background-color: #fff;
   padding: 24px;
-  border-radius: 12px;
-  max-width: 600px;
-  width: 90%;
-  max-height: 90vh;
-  overflow-y: auto;
+  border-radius: 8px;
+  max-width: 80%;
+  max-height: auto;
+  overflow: hidden;
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   text-align: center;
 }
 
-/* 閉じるボタン */
+.modalContent {
+  overflow-y: auto;
+  max-height: 90vh;  
+  padding: 10px;
+}
+
+.modal h2 {
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px dashed #544739;
+}
+
+/* モーダルを閉じるアイコン */
 .closeIcon {
   position: absolute;
   top: 8px;
@@ -43,36 +52,100 @@
   color: #000;
 }
 
-.modal h2{
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px dashed #544739;
+/* フォーム全体 */
+.form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
 }
 
-.form {
-  display: flex;
-  flex-direction: column;
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.leftColumn > div,
+.rightColumn > div {
+  max-width: 100%;
 }
 
 .field {
+  position: relative;
+  overflow: visible;
+  align-items: flex-start;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin-bottom: 20px;
 }
 
+
 .label {
-  font-weight: 600;
-  margin-bottom: 8px;
+  font-weight: 600px;
 }
 
+/* 入力項目 */
+.textInput,
+.textArea {
+  width: 90%;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  border: 1.5px solid #544739;
+  border-radius: 5px;
+}
+
+.textInput:focus,
+.textArea:focus {
+  outline: none;
+  border-color: #a4c3a6;
+}
+
+.textArea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* --- ボタンエリア --- */
+.buttons {
+  grid-column: 1 / -1;
+  margin-top: 16px;
+  text-align: center;
+}
+
+.button {
+  background-color: #a4c3a6;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+  width: auto;
+  display: block;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.button:hover {
+  background-color: #a4afa6;
+}
+
+/* --- オプション選択 --- */
+.satisfactionRow,
 .optionsRow {
   display: flex;
-  gap: 16px;
+  justify-content: center;
+  align-items: center;
   flex-wrap: wrap;
+  gap: 10px;
 }
 
 .optionItem {
   cursor: pointer;
-  border: 2px solid transparent;
-  border-radius: 50%;
+  border-radius: 8px;
   padding: 6px;
   width: 60px;
   height: 60px;
@@ -80,17 +153,14 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  transition: border-color 0.3s ease;
   user-select: none;
+  position: relative;
+  transition: border 0.2s ease;
+  border: none;
 }
 
 .optionItem:hover {
-  border-color: #a4c3a6;
-}
-
-.selected {
-  border-color: #a4c3a6;
-  /* background-color: #e0f0ff; */
+  background-color: #e0e0e0;
 }
 
 .icon {
@@ -106,75 +176,16 @@
   user-select: none;
 }
 
-.textInput {
-  width: 100%;
-  padding: 8px 12px;
-  font-size: 1rem;
-  border: 1.5px solid #544739;
-  border-radius: 6px;
-}
-
-.textInput:focus {
-  outline: none;
-  border-color: #a4c3a6;
-}
-
-.textArea {
-  width: 100%;
-  height: 100px;
-  padding: 8px 12px;
-  font-size: 1rem;
-  border: 1.5px solid #544739;
-  border-radius: 6px;
-  resize: vertical;
-}
-
-.textArea:focus {
-  outline: none;
-  border-color: #a4c3a6;
-}
-
-/* ファイル選択 */
-.labelWithButton {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  
-}
-
-/* 「ファイルを選択」を非表示にする */
-.hiddenFileInput {
+.selected::before {
+  content: "✔";
   position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  cursor: pointer;
-  font-size: 0;
-}
-
-/* 送信ボタン */
-.button {
-  background-color: #a4c3a6;
-  color: white;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 4px;
-  cursor: pointer;
+  top: 4px;
+  left: 4px;
   font-size: 16px;
-  transition: background-color 0.3s ease;
-  width: auto;
-  box-sizing: border-box;
-  display: block;
-  margin: 0 auto;
+  color: #544739;
 }
 
-.button:hover {
-  background-color: #a4afa6;
-}
-
-
+/* --- ファイルアップロードエリア --- */
 .labelWithButton {
   display: flex;
   align-items: center;
@@ -193,7 +204,103 @@
   padding: 2px;
 }
 
+.hiddenFileInput {
+  display: none;
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  font-size: 0;
+}
+
+.photoUploadWrapper {
+  border: 1px solid #544739;
+  border-radius: 6px;
+  padding: 8px;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: #fafafa;
+}
+
+/* --- 写真フレーム --- */
+.photoFrame {
+  border: 1px dashed #544739;
+  border-radius: 8px;
+  padding: 12px;
+  min-height: 200px;
+  width: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  cursor: pointer;
+  margin: 0 auto;
+  position: relative;
+  overflow: visible;
+}
+
+.photoFrame:hover {
+  background-color: #f0f0f0;
+  border: 1px dashed #a4c3a6;
+  color: #a4c3a6;
+}
+
+.previewImage {
+  max-height: 200px;
+  max-width: auto;
+  object-fit: contain;
+}
+
+.noBorder {
+  border: none;
+  padding: 0;
+}
+
+.photoFrame.noBorder:hover {
+  background-color: transparent;
+  border-color: transparent;
+  color: inherit;
+  cursor: default;
+}
+
+
+/* --- 追加ボタン（+） --- */
+.fullFrameButton {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: none;
+  border: none;
+  /* color: #666; */
+  font-size: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- ゴミ箱アイコン --- */
 .trashButton {
+  position: absolute;
+  bottom: 0;
+  right: -32px;
+  color: #544739;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  z-index: 1000;
+}
+
+.addPhotoButton {
   background: none;
   border: none;
   padding: 2px;
@@ -201,8 +308,4 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-}
-
-.hiddenFileInput {
-  display: none;
 }

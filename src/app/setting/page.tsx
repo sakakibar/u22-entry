@@ -1,23 +1,12 @@
 "use client";
 
 import { useState } from "react";
-// import Image from "next/image";
 import styles from './Setting.module.css';
 
 export default function SettingPage() {
   const [username, setUsername] = useState("山田太郎");
   const [email, setEmail] = useState("yamada@example.com");
-  // const [icon, setIcon] = useState<string | null>(null);
 
-  // const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const file = e.target.files?.[0];
-  //   if (file) {
-  //     const reader = new FileReader();
-  //     reader.onload = () => setIcon(reader.result as string);
-  //     reader.readAsDataURL(file);
-  //   }
-  // };
-  
   return (
     <main className="container">
       <h1 className="title">Setting</h1>
@@ -25,19 +14,6 @@ export default function SettingPage() {
       <section>
         <h2 className="heading2">プロフィール</h2>
         <div className={styles.profileForm}>
-          {/* <div className={styles.profileItem}>
-            <label>アイコン画像</label>
-            <div>
-              <Image
-                src={icon || "/icons/default_icon.png"}
-                alt="icon"
-                className={styles.iconPreview}
-                width={80}
-                height={80}
-              />
-              <input type="file" accept="image/*" onChange={handleIconChange} />
-            </div>
-          </div> */}
 
           <div className={styles.profileItem}>
             <label>ユーザー名</label>
@@ -64,7 +40,6 @@ export default function SettingPage() {
           <button className={styles.cancelButton} onClick={() => {
             setUsername("山田太郎");
             setEmail("yamada@example.com");
-            // setIcon(null);
           }}>
             キャンセル
           </button>

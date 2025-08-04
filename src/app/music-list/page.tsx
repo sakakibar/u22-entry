@@ -18,7 +18,7 @@ import styles from "./MusicList.module.css";
 const dummyData = Array.from({ length: 5 }, (_, i) => ({
   id: i,
   title: `title/2025.07.${10 + i}`,
-  imageUrl: "/icons/dummy.jpg",
+  imageUrl: "/tmb/dummy.jpg",
   audioUrl: `/audios/sample${i + 1}.mp3`,
 }));
 
@@ -107,9 +107,8 @@ export default function MusicListPage() {
   return (
     <main className="container">
       {/* <h1 className="title">Music List</h1> */}
-      <SearchBar value={searchQuery} onChange={handleSearchChange} />
+        <SearchBar value={searchQuery} onChange={handleSearchChange} />
     
-
       {/* プレイリスト */}
       <section className={styles.section}>
         <div

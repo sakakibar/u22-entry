@@ -8,7 +8,7 @@ import RegisterModal from "./RegisterModal";
 import styles from "./styles/Nav.module.css";
 
 export const Nav = () => {
-  const pathname = usePathname(); // 現在のパスを取得
+  const pathname = usePathname();
   const { data: session } = useSession();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
@@ -78,26 +78,6 @@ export const Nav = () => {
               TagSearch
             </Link>
           </li>
-          <li className={`${styles.li} ${pathname === "/diary-list" ? styles.active : ""}`}>
-            <Link href="/diary-list" className={styles.linkContent}>
-              {/* ノートアイコン */}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className={styles.icon}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-                width={20}
-                height={20}
-                aria-hidden="true"
-              >
-                <path d="M4 4h16v16H4z" />
-                <path d="M8 4v16" />
-              </svg>
-              DiaryList
-            </Link>
-          </li>
           <li className={`${styles.li} ${pathname === "/music-list" ? styles.active : ""}`}>
             <Link href="/music-list" className={styles.linkContent}>
               {/* 音符アイコン */}
@@ -157,67 +137,6 @@ export const Nav = () => {
               </svg>
               Setting
             </Link>
-          </li>
-
-          {/* ログイン/ログアウトアイコンを右下に配置 */}
-          <li className={`${styles.li} ${styles.loginLi}`}>
-            {!isLoggedIn ? (
-              <div
-                className={styles.linkContent}
-                onClick={openLogin}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") openLogin();
-                }}
-              >
-                {/* login icon */}
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className={styles.icon}
-                  width={20}
-                  height={20}
-                >
-                  <path d="M15 3h4a2 2 0 0 1 2 2v4" />
-                  <path d="M10 17l5-5-5-5" />
-                  <path d="M21 12H3" />
-                </svg>
-              </div>
-            ) : (
-              <div
-                className={styles.linkContent}
-                onClick={handleLogout}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleLogout();
-                }}
-              >
-                {/* logout icon */}
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className={styles.icon}
-                  width={20}
-                  height={20}
-                >
-                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                  <path d="M16 17l5-5-5-5" />
-                  <path d="M21 12H9" />
-                </svg>
-              </div>
-            )}
           </li>
         </ul>
       </nav>
