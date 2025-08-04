@@ -37,7 +37,7 @@ export const Nav = () => {
       <nav className={styles.nav}>
         <ul className={styles.ul}>
           <li className={`${styles.li} ${pathname === "/" ? styles.active : ""}`}>
-            <Link href="/" className={styles.linkContent}>
+            <Link href="/home" className={styles.linkContent}>
               {/* カレンダーアイコン */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"

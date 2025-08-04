@@ -1,0 +1,108 @@
+.container {
+  max-width: 100%;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  font-family: 'Noto Sans JP', sans-serif;
+  color: #544739;
+  line-height: 1.6;
+  background-color: #fafafa;
+  border-radius: 8px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+
+.heading1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #544739;
+}
+
+.section {
+  margin-bottom: 2rem;
+  padding: 1rem 1.5rem;
+  background-color: #fff;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+.heading2 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  border-bottom: 3px solid #a4c3a6;
+  padding-bottom: 0.25rem;
+  color: #544739;
+}
+
+.paragraph {
+  font-size: 1.1rem;
+  color: #544739;
+}
+
+.list {
+  padding-left: 1.4rem;
+  color: #544739;
+}
+
+.listItem {
+  margin-bottom: 0.8rem;
+  font-size: 1.05rem;
+}
+
+.ctaSection {
+  background-color: #a4c3a6;
+  color: white;
+  text-align: center;
+  padding: 2rem 1rem;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+  margin-bottom: 3rem;
+}
+
+.ctaHeading {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  letter-spacing: 0.02em;
+}
+
+.ctaParagraph {
+  font-size: 1.2rem;
+  margin-bottom: 1.8rem;
+}
+
+.ctaButton {
+  background-color: white;
+  color: #a4c3a6;
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding: 0.65rem 1.8rem;
+  border: none;
+  border-radius: 40px;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.ctaButton:hover {
+  background-color: #a4afa6;
+  color: white;
+}
+
+.loginButton {
+  background-color: transparent;
+  border: 2px solid white;
+  color: white;
+  font-weight: 600;
+  font-size: 1.05rem;
+  padding: 0.55rem 1.5rem;
+  border-radius: 40px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.loginButton:hover {
+  background-color: white;
+  color: #a4c3a6;
+}
