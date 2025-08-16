@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import styles from '../styles/About.module.css';
+import styles from '../styles/Landing.module.css';
 import LoginModal from "../components/LoginModal";
 import RegisterModal from "../components/RegisterModal";
 
-export default function AboutPage() {
+export default function LandingPage() {
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
 

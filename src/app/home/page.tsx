@@ -87,7 +87,7 @@ export default function HomePage() {
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push("/about");
+      router.push("/");
     }
   }, [status, router]);
 
