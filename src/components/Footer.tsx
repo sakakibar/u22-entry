@@ -6,20 +6,33 @@ export const Footer = () => {
       <div className={styles.container}>
 
         {/* 情報リンク */}
-        <div className={styles.links}>
-          <a href="/terms-of-service" className={styles.link}>
-            利用規約
-          </a>
-          <a href="/privacy-policy" className={styles.link}>
-            プライバシーポリシー
-          </a>
-          <a href="/contact" className={styles.link}>
-            お問い合わせ
-          </a>
-          <a href="/faq" className={styles.link}>
-            Q&A
-          </a>
-        </div>
+<div className={styles.links}>
+  <a href="/terms-of-service" className={styles.link}>
+    利用規約
+  </a>
+  <a href="/privacy-policy" className={styles.link}>
+    プライバシーポリシー
+  </a>
+  <a href="mailto:info@chordia.com" className={`${styles.link} ${styles.contactLink}`}>
+    お問い合わせ先
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      fill="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path d="M2 4c-1.1 0-2 .9-2 2v12c0 
+      1.1.9 2 2 2h20c1.1 0 2-.9 
+      2-2V6c0-1.1-.9-2-2-2H2zm0 
+      2h20v.01L12 13 2 6.01V6zm0 
+      3.236l7.803 5.353a2 
+      2 0 002.394 0L20 
+      9.236V18H2V9.236z"/>
+    </svg>
+    info@chordia.com
+  </a>
+</div>
 
         {/* メッセージ */}
         <p className={styles.message}>

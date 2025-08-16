@@ -1,4 +1,4 @@
- .footer {
+.footer {
   background-color: #f9f9f9;
   color: #544739;
   font-size: 0.875rem;
@@ -16,9 +16,10 @@
 
 .links {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center; /* 縦位置を揃える */
+  flex-wrap: wrap;     /* 幅が狭いとき折り返す */
   justify-content: center;
-  gap: 1.5rem;
+  gap: 1.5rem;         /* リンク間の間隔 */
   margin-bottom: 1rem;
 }
 
@@ -27,10 +28,18 @@
   text-decoration: none;
   white-space: nowrap;
   transition: color 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem; /* アイコンや文字の間隔 */
 }
 
 .link:hover {
   color: #a4afa6;
+  text-decoration: underline;
+}
+
+.link svg {
+  flex-shrink: 0; /* アイコンが縮まないように */
 }
 
 .message {
@@ -46,4 +55,3 @@
   opacity: 0.7;
   text-align: center;
 }
-
