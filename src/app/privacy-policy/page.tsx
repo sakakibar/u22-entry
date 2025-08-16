@@ -1,8 +1,11 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import styles from "../../styles/Policy.module.css";
 
 export default function PrivacyPolicyPage() {
+  const router = useRouter();
+
   return (
     <div className={styles.container}>
       <h1 className={styles.heading}>プライバシーポリシー</h1>
@@ -29,6 +32,23 @@ export default function PrivacyPolicyPage() {
       </p>
 
       <p className={styles.update}>最終更新日：2025年8月16日</p>
+
+      {/* 戻るボタン（右下固定） */}
+      <button className={styles.backButton} onClick={() => router.back()}>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          fill="none"
+          stroke="white"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          viewBox="0 0 24 24"
+        >
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+      </button>
     </div>
   );
 }
