@@ -1,0 +1,27 @@
+07.08時点出の実行コマンド：
+npx prisma migrate dev --name add_music_fields
+npm install fluent-ffmpeg ffmpeg-static ffprobe-static
+npm install --save-dev @types/fluent-ffmpeg
+
+Remove-Item -Recurse -Force node_modules\.prisma
+Remove-Item -Recurse -Force node_modules\@prisma
+npm install
+npx prisma generate
+
+↑一旦無視してください 08.20
+
+
+npm install recharts
+npx prisma generate
+
+↑実行してください
+
+残タスク（優先度順）
+
+・日記登録による音楽生成機能　済
+・音楽一覧　済
+・レポート機能　済
+・パスワード変更　済
+・ユーザー情報変更　済
+・アカウント削除　済
+・お気に入り機能(?)

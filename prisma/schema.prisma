@@ -10,6 +10,7 @@ datasource db {
 
 model users {
   userID     String   @id @default(cuid())
+  auth_id    String   @unique
   username   String
   mail       String   @unique
   password   String
@@ -36,18 +37,23 @@ model Diary {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  user       users    @relation(fields: [poster], references: [userID])
+  user       users    @relation(fields: [poster], references: [userID], onDelete: Cascade)
   musics     musics[]
+
+  @@map("Diary") //大文字テーブル名を表記
 }
 
 model musics {
   musicID         String   @id @default(cuid())
-  title           String
+  title           String?
   music_url       String
   generation_type String?
   parameters      String?
   created_at      DateTime @default(now())
 
   diaryID         String
-  diary           Diary    @relation(fields: [diaryID], references: [diaryID])
+  diary           Diary    @relation(fields: [diaryID], references: [diaryID], onDelete: Cascade)
+
+  image_url       String? @default("/music-thumbnail.png")
+
 }

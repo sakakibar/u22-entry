@@ -1,0 +1,12 @@
+/* X軸ラベル用 */
+.xAxisLabel {
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 2; /* 行間を広くする */
+}
+
+
+/* 凡例の位置調整 */
+.legend {
+    margin-top: 0; /* BarChartのmarginで調整 */
+}

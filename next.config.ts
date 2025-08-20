@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  experimental: {
+    serverComponentsExternalPackages: ["fluent-ffmpeg", "ffprobe-static", "ffmpeg-static"],
+  },
 };
 
 export default nextConfig;

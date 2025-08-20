@@ -9,7 +9,6 @@ import DiaryModal from "../../components/DiaryModal";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-
 type DiaryData = {
   diaryID: string;
   title: string;
@@ -18,7 +17,7 @@ type DiaryData = {
   weather?: string;
   mood?: string;
   imageUrl?: string;
-  musicUrl?: string;
+  musics?: { musicID: string; title?: string; music_url: string }[];
   created_at?: string;
 };
 
@@ -34,7 +33,6 @@ export default function HomePage() {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const router = useRouter();
-
 
   const togglePlay = () => {
     if (!audioRef.current) return;
@@ -84,14 +82,11 @@ export default function HomePage() {
     setIsModalOpen(true);
   };
 
-
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/");
     }
   }, [status, router]);
-
-  // if (status === "loading") return null;
 
   useEffect(() => {
     if (!selectedDate) {
@@ -99,15 +94,15 @@ export default function HomePage() {
       return;
     }
 
-    setIsLoading(true);
-    setError(null);
+    const fetchData = async () => {
+      setIsLoading(true);
+      setError(null);
 
-    fetch(`/api/diary/list`)
-      .then(res => {
+      try {
+        const res = await fetch(`/api/diary/list`);
         if (!res.ok) throw new Error("データ取得失敗");
-        return res.json();
-      })
-      .then(data => {
+        const data = await res.json();
+
         const normalizeDate = (input: string | Date): string => {
           const d = new Date(input);
           const yyyy = d.getFullYear();
@@ -119,6 +114,28 @@ export default function HomePage() {
         const matched = data.find((d: any) => normalizeDate(d.created_at) === selectedDate);
 
         if (matched) {
+          let musics = [];
+          try {
+            const musicRes = await fetch(`/api/music?diaryID=${matched.diaryID}`);
+            if (musicRes.ok) {
+              const musicData = await musicRes.json();
+              // 配列に変換してmapで扱えるように
+              musics = Array.isArray(musicData)
+                  ? musicData.map((m: any, idx: number) => ({
+                    musicID: idx.toString(),
+                    title: `音楽 ${idx + 1}`,
+                    music_url: m.music_url,
+                  }))
+                  : [{
+                    musicID: "0",
+                    title: "",
+                    music_url: musicData.music_url,
+                  }];
+            }
+          } catch (err) {
+            console.warn("音楽URLの取得に失敗:", err);
+          }
+
           setDiaryData({
             diaryID: matched.diaryID,
             title: matched.title,
@@ -128,181 +145,182 @@ export default function HomePage() {
             mood: matched.mood,
             created_at: matched.created_at,
             imageUrl: matched.imageUrl,
-            musicUrl: matched.musicUrl,
+            musics: musics,
           });
         } else {
           setDiaryData(null);
         }
-      })
-      .catch((err) => {
+      } catch (err: any) {
         if (err.message === "unauthorized") {
           setError("ログインしてください");
         } else {
           setError("日記の取得に失敗しました");
         }
         setDiaryData(null);
-      })
-      .finally(() => {
+      } finally {
         setIsLoading(false);
-      });
+      }
+    };
+
+    fetchData();
   }, [selectedDate]);
 
   return (
-    <main className={styles.pageWrapper}>
-      
-      <SearchBar value={searchQuery} onChange={handleSearchChange} />
+      <main className={styles.pageWrapper}>
+        <SearchBar value={searchQuery} onChange={handleSearchChange} />
 
-      <button className={styles.floatingButton} onClick={openModal}>
-        日記を書く
-      </button>
+        <button className={styles.floatingButton} onClick={openModal}>
+          日記を書く
+        </button>
 
-      <div className={styles.mainContent}>
-        <div className={styles.calendarSection}>
-          <Calendar onDateSelect={setSelectedDate} />
+        <div className={styles.mainContent}>
+          <div className={styles.calendarSection}>
+            <Calendar onDateSelect={setSelectedDate} />
 
-          {isModalOpen && (
-            <DiaryModal
-              onClose={closeModal}
-              initialData={editingDiary}
-              onUpdate={updatedDiary => {
-                setDiaryData(updatedDiary);
-                setEditingDiary(null);
-                setIsModalOpen(false);
+            {isModalOpen && (
+                <DiaryModal
+                    onClose={closeModal}
+                    initialData={editingDiary}
+                    onUpdate={updatedDiary => {
+                      setDiaryData(updatedDiary);
+                      setEditingDiary(null);
+                      setIsModalOpen(false);
 
-                const date = updatedDiary.created_at?.slice(0, 10);
-                if (date) {
-                  setSelectedDate(date);
-                } else if (selectedDate) {
-                  setSelectedDate(null);
-                  setTimeout(() => setSelectedDate(selectedDate), 0);
-                }
-              }}
-            />
-          )}
-        </div>
-        {session && (
-        <div className={styles.detailPanel}>
-          {selectedDate ? (
-            <>
-              <h2>{selectedDate}</h2>
+                      const date = updatedDiary.created_at?.slice(0, 10);
+                      if (date) {
+                        setSelectedDate(date);
+                      } else if (selectedDate) {
+                        setSelectedDate(null);
+                        setTimeout(() => setSelectedDate(selectedDate), 0);
+                      }
+                    }}
+                />
+            )}
+          </div>
 
-              {isLoading ? (
-                <p>読み込み中...</p>
-              ) : error ? (
-                <p style={{ color: "red" }}>{error}</p>
-              ) : diaryData ? (
-                <>
-                  {diaryData.imageUrl && (
-                    <div className={styles.imageWrapper}>
-                      <Image
-                        src={diaryData.imageUrl}
-                        alt="日記画像"
-                        width={600}
-                        height={400}
-                        className={styles.diaryImage}
-                        onError={() => {
-                          console.error("画像の読み込みに失敗:", diaryData.imageUrl);
-                        }}
-                      />
+          {session && (
+              <div className={styles.detailPanel}>
+                {selectedDate ? (
+                    <>
+                      <h2>{selectedDate}</h2>
 
-                      {/* 音楽プレイヤー */}
-                      {diaryData.musicUrl && (
-                        <div className={styles.audioPlayer}>
-                          <audio
-                            ref={audioRef}
-                            src={diaryData.musicUrl}
-                            controls
-                            preload="none"
-                            onEnded={() => {
-                            }}
-                          />
-                        </div>
+                      {isLoading ? (
+                          <p>読み込み中...</p>
+                      ) : error ? (
+                          <p style={{ color: "red" }}>{error}</p>
+                      ) : diaryData ? (
+                          <>
+                            {diaryData.imageUrl && (
+                                <div className={styles.imageWrapper}>
+                                  <Image
+                                      src={diaryData.imageUrl}
+                                      alt="日記画像"
+                                      width={600}
+                                      height={400}
+                                      className={styles.diaryImage}
+                                      onError={() => {
+                                        console.error("画像の読み込みに失敗:", diaryData.imageUrl);
+                                      }}
+                                  />
+                                </div>
+                            )}
+
+
+
+                            <div className={styles.detailItem}>
+                              <span className={styles.label}>満足度</span>
+                              <span className={styles.value}>{diaryData.score}</span>
+                            </div>
+                            <div className={styles.detailItem}>
+                              <span className={styles.label}>天気</span>
+                              <span className={styles.value}>{diaryData.weather}</span>
+                            </div>
+                            <div className={styles.detailItem}>
+                              <span className={styles.label}>どんな一日だった？</span>
+                              <span className={styles.value}>{diaryData.mood}</span>
+                            </div>
+                            <div className={styles.detailItem}>
+                              <span className={styles.label}>タイトル</span>
+                              <span className={styles.value}>{diaryData.title}</span>
+                            </div>
+                            <div className={styles.detailItem}>
+                              <span className={styles.label}>本文</span>
+                              <span className={styles.value}>{diaryData.content}</span>
+                            </div>
+
+                            {diaryData.musics?.length ? (
+                                diaryData.musics.map(music => (
+                                    <div key={music.musicID}>
+                                      <p>{music.title}</p>
+                                      <audio controls src={music.music_url}></audio>
+                                    </div>
+                                ))
+                            ) : (
+                                <p>音楽は登録されていません</p>
+                            )}
+
+                            <div className={styles.iconButtonGroup}>
+                              <button
+                                  onClick={() => handleEdit(diaryData)}
+                                  aria-label="編集"
+                                  className={styles.iconButton}
+                              >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="20"
+                                    height="20"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    viewBox="0 0 24 24"
+                                >
+                                  <path d="M12 20h9" />
+                                  <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 12.5-12.5z" />
+                                </svg>
+                              </button>
+
+                              <button
+                                  onClick={() => handleDelete(diaryData.diaryID)}
+                                  aria-label="削除"
+                                  className={styles.iconButton}
+                              >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="20"
+                                    height="20"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    viewBox="0 0 24 24"
+                                >
+                                  <polyline points="3 6 5 6 21 6" />
+                                  <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                                  <path d="M10 11v6" />
+                                  <path d="M14 11v6" />
+                                  <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+                                </svg>
+                              </button>
+                            </div>
+                          </>
+                      ) : (
+                          <>
+                            <p>この日に登録された日記はありません。</p>
+                            <button className={styles.button} onClick={openModal}>
+                              日記を登録する
+                            </button>
+                          </>
                       )}
-                    </div>
-                  )}
-                  <div className={styles.detailItem}>
-                    <span className={styles.label}>満足度</span>
-                    <span className={styles.value}>{diaryData.score}</span>
-                  </div>
-                  <div className={styles.detailItem}>
-                    <span className={styles.label}>天気</span>
-                    <span className={styles.value}>{diaryData.weather}</span>
-                  </div>
-                  <div className={styles.detailItem}>
-                    <span className={styles.label}>どんな一日だった？</span>
-                    <span className={styles.value}>{diaryData.mood}</span>
-                  </div>
-                  <div className={styles.detailItem}>
-                    <span className={styles.label}>タイトル</span>
-                    <span className={styles.value}>{diaryData.title}</span>
-                  </div>
-                  <div className={styles.detailItem}>
-                    <span className={styles.label}>本文</span>
-                    <span className={styles.value}>{diaryData.content}</span>
-                  </div>
-
-                  <div className={styles.iconButtonGroup}>
-                    <button
-                      onClick={() => handleEdit(diaryData)}
-                      aria-label="編集"
-                      className={styles.iconButton}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="20"
-                        height="20"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M12 20h9" />
-                        <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 12.5-12.5z" />
-                      </svg>
-                    </button>
-
-                    <button
-                      onClick={() => handleDelete(diaryData.diaryID)}
-                      aria-label="削除"
-                      className={styles.iconButton}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="20"
-                        height="20"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        viewBox="0 0 24 24"
-                      >
-                        <polyline points="3 6 5 6 21 6" />
-                        <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
-                        <path d="M10 11v6" />
-                        <path d="M14 11v6" />
-                        <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
-                      </svg>
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <p>この日に登録された日記はありません。</p>
-                  <button className={styles.button} onClick={openModal}>
-                    日記を登録する
-                  </button>
-                </>
-              )}
-            </>
-          ) : (
-            <p>日付を選択すると詳細が表示されます。</p>
+                    </>
+                ) : (
+                    <p>日付を選択すると詳細が表示されます。</p>
+                )}
+              </div>
           )}
         </div>
-        )}
-      </div>
-    </main>
+      </main>
   );
 }

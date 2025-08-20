@@ -1,6 +1,6 @@
-import NextAuth, {AuthOptions} from "next-auth";
+import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 
 export const authOptions: AuthOptions = {
     providers: [
@@ -17,6 +17,7 @@ export const authOptions: AuthOptions = {
                 if (!user || user.password !== credentials?.password) {
                     throw new Error("メールまたはパスワードが間違っています");
                 }
+                // userID を含めて返す
                 return { id: user.userID, email: user.mail, name: user.username };
             },
         }),
@@ -24,16 +25,22 @@ export const authOptions: AuthOptions = {
     session: { strategy: "jwt" },
     callbacks: {
         async jwt({ token, user }) {
-            if (user) token.userID = user.id;
+            if (user) {
+                // authorize で返した user の id を token にセット
+                token.userID = user.id;
+            }
             return token;
         },
         async session({ session, token }) {
-            session.user = { ...session.user, userID: token.userID as string };
+            // session.user.userID を必ずセット
+            session.user = {
+                ...session.user,
+                userID: token.userID as string,
+            };
             return session;
         },
     },
 };
 
 const handler = NextAuth(authOptions);
-
 export { handler as GET, handler as POST };

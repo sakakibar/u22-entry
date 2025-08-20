@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import styles from "./styles/DiaryModal.module.css";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
@@ -14,6 +14,8 @@ type Props = {
     content: string;
     score: string;
     weather: string;
+    people: string;
+    hobby: string;
     mood: string;
     imageUrl?: string;
     created_at?: string;
@@ -25,10 +27,11 @@ export default function DiaryModal({ onClose, initialData, onUpdate }: Props) {
   const { data: session } = useSession();
   const poster = session?.user?.userID;
   const isEditMode = !!initialData;
-  const hiddenFileInput = useRef<HTMLInputElement>(null);
 
   const [satisfaction, setSatisfaction] = useState<number | null>(null);
   const [weather, setWeather] = useState<string | null>(null);
+  const [people, setPeople] = useState<string | null>(null);
+  const [hobby, setHobby] = useState<string | null>(null);
   const [emotion, setEmotion] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -37,42 +40,19 @@ export default function DiaryModal({ onClose, initialData, onUpdate }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const formatDate = (dateStr: string | Date) => {
-    const date = new Date(dateStr);
-    return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
-  };
-
   const satisfactionOptions = [1, 2, 3, 4, 5];
+  const weatherOptions = ["晴れ", "曇り", "雨", "雪"];
+  const peopleOptions = ["家族", "友人", "同僚", "一人"];
+  const hobbyOptions = ["スポーツ", "読書", "音楽", "ゲーム"];
+  const emotionOptions = ["嬉しい", "悲しい", "怒り", "楽しい"];
 
-  const weatherOptions = [
-    { label: "晴れ", icon: "☀️" },
-    { label: "くもり", icon: "☁️" },
-    { label: "雨", icon: "🌧️" },
-    { label: "雪", icon: "❄️" },
-    { label: "雷", icon: "⚡" },
-    { label: "風", icon: "🌬️" },
-    { label: "霧", icon: "🌫️" },
-    { label: "その他", icon: "❔" },
-  ];
-
-  const emotionOptions = [
-    { label: "最高", icon: "😆" },
-    { label: "嬉しい", icon: "😊" },
-    { label: "楽しい", icon: "😄" },
-    { label: "安心", icon: "😌" },
-    { label: "普通", icon: "😐" },
-    { label: "疲れた", icon: "😮‍💨" },
-    { label: "悲しい", icon: "😢" },
-    { label: "不安", icon: "😟" },
-    { label: "怒り", icon: "😡" },
-    { label: "最悪", icon: "😖" },
-    { label: "その他", icon: "❔" },
-  ];
-
+  // ⭐ 編集モード：初期データをセット
   useEffect(() => {
     if (initialData) {
       setSatisfaction(Number(initialData.score));
       setWeather(initialData.weather);
+      setPeople(initialData.people);
+      setHobby(initialData.hobby);
       setEmotion(initialData.mood);
       setTitle(initialData.title);
       setContent(initialData.content);
@@ -89,11 +69,13 @@ export default function DiaryModal({ onClose, initialData, onUpdate }: Props) {
     }
 
     if (
-      satisfaction === null ||
-      !weather ||
-      !emotion ||
-      title.trim() === "" ||
-      content.trim() === ""
+        satisfaction === null ||
+        !weather ||
+        !people ||
+        !hobby ||
+        !emotion ||
+        title.trim() === "" ||
+        content.trim() === ""
     ) {
       setError("全ての項目を入力してください");
       return;
@@ -110,8 +92,8 @@ export default function DiaryModal({ onClose, initialData, onUpdate }: Props) {
       const filePath = `private/${poster}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from("diary-images")
-        .upload(filePath, imageFile);
+          .from("diary-images")
+          .upload(filePath, imageFile);
 
       if (uploadError) {
         console.error("画像アップロード失敗:", uploadError.message);
@@ -121,8 +103,8 @@ export default function DiaryModal({ onClose, initialData, onUpdate }: Props) {
       }
 
       const { data: publicUrlData } = supabase.storage
-        .from("diary-images")
-        .getPublicUrl(filePath);
+          .from("diary-images")
+          .getPublicUrl(filePath);
       imageUrl = publicUrlData?.publicUrl ?? null;
     }
 
@@ -137,6 +119,8 @@ export default function DiaryModal({ onClose, initialData, onUpdate }: Props) {
           content,
           score: satisfaction.toString(),
           weather,
+          people,
+          hobby,
           mood: emotion,
           imageUrl,
         }),
@@ -149,6 +133,23 @@ export default function DiaryModal({ onClose, initialData, onUpdate }: Props) {
         return;
       }
 
+      //音楽生成処理の追加
+      if (!isEditMode && data?.diaryID) {
+        try {
+          await fetch("/api/generate-music", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              prompt: content,
+              diaryID: data.diaryID,
+            }),
+          });
+          console.log("音楽生成リクエスト完了");
+        } catch (err) {
+          console.error("音楽生成エラー:", err);
+        }
+      }
+
       alert(isEditMode ? "日記を更新しました！" : "日記を登録しました！");
 
       if (onUpdate) {
@@ -158,6 +159,8 @@ export default function DiaryModal({ onClose, initialData, onUpdate }: Props) {
           content,
           score: satisfaction.toString(),
           weather,
+          people,
+          hobby,
           mood: emotion,
           imageUrl,
           created_at: initialData?.created_at ?? new Date().toISOString(),
@@ -189,190 +192,191 @@ export default function DiaryModal({ onClose, initialData, onUpdate }: Props) {
   };
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <button className={styles.closeIcon} onClick={onClose}>
-          ×
-        </button>
-        <div className={styles.modalContent}>
-        <h2>
-          {formatDate(initialData?.created_at ?? new Date())}の日記を{isEditMode ? "編集" : "投稿"}
-        </h2>
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <div className={styles.leftColumn}>
-            {/* 満足度 */}
+  <div className={styles.overlay} onClick={onClose}>
+        <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+          <button className={styles.closeIcon} onClick={onClose}>
+            ×
+          </button>
+          <h2>{isEditMode ? "日記編集フォーム" : "日記登録フォーム"}</h2>
+          <form onSubmit={handleSubmit} className={styles.form}>
             <div className={styles.field}>
               <div className={styles.label}>今日の満足度</div>
-              <div className={styles.satisfactionRow}>
+              <div className={styles.optionsRow}>
                 {satisfactionOptions.map((num) => (
-                  <span
-                    key={num}
-                    onClick={() => setSatisfaction(num)}
-                    className={`${styles.star} ${
-                      satisfaction !== null && num <= satisfaction ? styles.filled : ""
-                    }`}
-                    style={{ cursor: "pointer", marginRight: "5px" }}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      width="28"
-                      height="28"
-                      fill={
-                        satisfaction !== null && num <= satisfaction
-                          ? "#FFD700"
-                          : "#E0E0E0"
-                      }
-                      aria-hidden="true"
-                      focusable="false"
+                    <div
+                        key={num}
+                        className={`${styles.optionItem} ${
+                            satisfaction === num ? styles.selected : ""
+                        }`}
+                        onClick={() => setSatisfaction(num)}
                     >
-                      <path d="M12 2.25c.47 0 .9.28 1.08.71l2.09 4.62 5.01.73c.45.07.83.37.97.8.14.43.02.91-.3 1.23l-3.63 3.55.86 5.01c.08.45-.1.91-.48 1.18-.38.27-.88.3-1.29.08L12 17.77l-4.48 2.36c-.41.22-.91.19-1.29-.08-.38-.27-.56-.73-.48-1.18l.86-5.01-3.63-3.55c-.33-.32-.44-.8-.3-1.23.14-.43.52-.73.97-.8l5.01-.73 2.09-4.62c.18-.43.61-.71 1.08-.71z" />
-                    </svg>
-                  </span>
+                      <Image
+                          src="/icons/default_icon.png"
+                          alt={`${num}のアイコン`}
+                          width={32}
+                          height={32}
+                          className={styles.icon}
+                      />
+                      <div className={styles.optionLabel}>{num}</div>
+                    </div>
                 ))}
               </div>
             </div>
 
-            {/* 天気 */}
             <div className={styles.field}>
-              <div className={styles.label}>今日の天気</div>
+              <div className={styles.label}>天気</div>
               <div className={styles.optionsRow}>
-                {weatherOptions.map(({ label, icon }) => (
-                  <button
-                    key={label}
-                    type="button"
-                    onClick={() => setWeather(label)}
-                    className={`${styles.optionItem} ${weather === label ? styles.selected : ""}`}
-                    aria-label={label}
-                  >
-                    <span style={{ fontSize: "24px" }}>{icon}</span>
-                    <div className={styles.optionLabel}>{label}</div>
-                  </button>
+                {weatherOptions.map((w) => (
+                    <div
+                        key={w}
+                        className={`${styles.optionItem} ${
+                            weather === w ? styles.selected : ""
+                        }`}
+                        onClick={() => setWeather(w)}
+                    >
+                      <Image
+                          src="/icons/default_icon.png"
+                          alt={`${w}のアイコン`}
+                          width={32}
+                          height={32}
+                          className={styles.icon}
+                      />
+                      <div className={styles.optionLabel}>{w}</div>
+                    </div>
                 ))}
               </div>
             </div>
 
-            {/* どんな一日だった？ */}
             <div className={styles.field}>
-              <div className={styles.label}>どんな一日だった？</div>
+              <div className={styles.label}>人々</div>
               <div className={styles.optionsRow}>
-                {emotionOptions.map(({ label, icon }) => (
-                  <button
-                    key={label}
-                    type="button"
-                    onClick={() => setEmotion(label)}
-                    className={`${styles.optionItem} ${emotion === label ? styles.selected : ""}`}
-                    aria-label={label}
-                  >
-                    <span style={{ fontSize: "24px" }}>{icon}</span>
-                    <div className={styles.optionLabel}>{label}</div>
-                  </button>
+                {peopleOptions.map((p) => (
+                    <div
+                        key={p}
+                        className={`${styles.optionItem} ${
+                            people === p ? styles.selected : ""
+                        }`}
+                        onClick={() => setPeople(p)}
+                    >
+                      <Image
+                          src="/icons/default_icon.png"
+                          alt={`${p}のアイコン`}
+                          width={32}
+                          height={32}
+                          className={styles.icon}
+                      />
+                      <div className={styles.optionLabel}>{p}</div>
+                    </div>
                 ))}
               </div>
             </div>
-          </div>
 
-          <div className={styles.rightColumn}>
-            {/* 写真アップロード */}
             <div className={styles.field}>
-              <label className={styles.label}>今日の一枚</label>
-                <div className={`${styles.photoFrame} ${previewUrl ? styles.noBorder : ""}`}>
-                {previewUrl ? (
-                  <>
-                    <Image
-                      src={previewUrl}
-                      alt="選択された画像のプレビュー"
-                      width={200}
-                      height={200}
-                      className={styles.previewImage}
-                      unoptimized
-                      style={{ objectFit: "contain", borderRadius: "8px" }}
-                    />
-                    <button
-                      type="button"
-                      className={styles.trashButton}
-                      onClick={() => {
-                        setPreviewUrl(null);
-                        setImageFile(null);
-                      }}
-                      aria-label="画像を削除"
-                      title="画像を削除"
-                      style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+              <div className={styles.label}>趣味</div>
+              <div className={styles.optionsRow}>
+                {hobbyOptions.map((h) => (
+                    <div
+                        key={h}
+                        className={`${styles.optionItem} ${
+                            hobby === h ? styles.selected : ""
+                        }`}
+                        onClick={() => setHobby(h)}
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        viewBox="0 0 24 24"
-                        width="24"
-                        height="24"
-                      >
-                        <polyline points="3 6 5 6 21 6" />
-                        <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
-                        <path d="M10 11v6" />
-                        <path d="M14 11v6" />
-                        <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
-                      </svg>
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      type="button"
-                      className={styles.fullFrameButton}
-                      onClick={() => hiddenFileInput.current?.click()}
-                      aria-label="写真を追加"
-                    >
-                      +
-                    </button>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      ref={hiddenFileInput}
-                      onChange={handleFileChange}
-                      style={{ display: "none" }}
-                      className={styles.hiddenFileInput}
-                    />
-                  </>
-                )}
+                      <Image
+                          src="/icons/default_icon.png"
+                          alt={`${h}のアイコン`}
+                          width={32}
+                          height={32}
+                          className={styles.icon}
+                      />
+                      <div className={styles.optionLabel}>{h}</div>
+                    </div>
+                ))}
               </div>
             </div>
 
-            {/* タイトル */}
+            <div className={styles.field}>
+              <div className={styles.label}>感情</div>
+              <div className={styles.optionsRow}>
+                {emotionOptions.map((e) => (
+                    <div
+                        key={e}
+                        className={`${styles.optionItem} ${
+                            emotion === e ? styles.selected : ""
+                        }`}
+                        onClick={() => setEmotion(e)}
+                    >
+                      <Image
+                          src="/icons/default_icon.png"
+                          alt={`${e}のアイコン`}
+                          width={32}
+                          height={32}
+                          className={styles.icon}
+                      />
+                      <div className={styles.optionLabel}>{e}</div>
+                    </div>
+                ))}
+              </div>
+            </div>
+
             <div className={styles.field}>
               <label className={styles.label}>タイトル</label>
               <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-                className={styles.textInput}
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  required
+                  className={styles.textInput}
               />
             </div>
 
-            {/* 本文 */}
             <div className={styles.field}>
               <label className={styles.label}>本文</label>
               <textarea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                required
-                className={styles.textArea}
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  required
+                  className={styles.textArea}
               />
             </div>
-          </div>
 
-          <div className={styles.buttons}>
-            <button type="submit" className={styles.button} disabled={loading}>
-              {loading ? "登録中..." : isEditMode ? "更新" : "投稿"}
-            </button>
-          </div>
-        </form>
+            <div className={styles.field}>
+              <div className={styles.labelWithButton}>
+                <label className={styles.label}>写真を追加</label>
+                <label className={styles.addPhotoButton}>
+                  ＋
+                  <input
+                      type="file"
+                      accept="image/*"
+                      className={styles.hiddenFileInput}
+                      onChange={handleFileChange}
+                  />
+                </label>
+              </div>
+              {previewUrl && (
+                  <div className={styles.previewContainer}>
+                    <Image
+                        src={previewUrl}
+                        alt="選択された画像のプレビュー"
+                        width={200}
+                        height={200}
+                        className={styles.previewImage}
+                        unoptimized
+                        style={{ objectFit: "contain", borderRadius: "8px" }}
+                    />
+                  </div>
+              )}
+            </div>
+
+            {error && <p className={styles.error}>{error}</p>}
+
+            <div className="buttons">
+              <button type="submit" className={styles.button} disabled={loading}>
+                {loading ? "登録中..." : isEditMode ? "更新" : "投稿"}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-      </div>
-    </div>
   );
 }

@@ -11,7 +11,7 @@ export default function MusicPlayer() {
         const res = await fetch("/api/generate-music", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt }),
+            body: JSON.stringify({ prompt}),
         });
 
         if (!res.ok) {

@@ -1,159 +1,148 @@
-// import Link from 'next/link';
-// import styles from './Report.module.css';
-
-// export default function ReportPage() {
-//   return (
-//     <main className="container">
-//       <h1 className="title">Report</h1>
-//     </main>
-//   );
-// }
-
-// デモデータ（後で実データと置き換える）
 "use client";
-import React from "react";
+
+import React, { useEffect, useState } from "react";
+import styles from "./Report.module.css";
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend,
-  LineChart, Line, CartesianGrid,
+    BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, CartesianGrid,
+    PieChart, Pie, Cell
 } from "recharts";
 
-const satisfactionOptions = [1, 2, 3, 4, 5];
+const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
-const weatherOptions = [
-  { label: "晴れ", icon: "☀️", color: "#FFD700" },
-  { label: "くもり", icon: "☁️", color: "#A9A9A9" },
-  { label: "雨", icon: "🌧️", color: "#1E90FF" },
-  { label: "雪", icon: "❄️", color: "#ADD8E6" },
-  { label: "雷", icon: "⚡", color: "#FFA500" },
-  { label: "風", icon: "🌬️", color: "#7FFFD4" },
-  { label: "霧", icon: "🌫️", color: "#D3D3D3" },
-  { label: "その他", icon: "❔", color: "#C0C0C0" },
-];
+export default function DiarySatisfactionReport() {
+    const [chartData, setChartData] = useState<{ score: number; percentage: number }[]>([]);
+    const [extraCharts, setExtraCharts] = useState<{ [key: string]: { name: string; value: number }[] }>({});
+    const [loading, setLoading] = useState(true);
+    const [average, setAverage] = useState(0); //平均値
 
-const emotionOptions = [
-  { label: "最高", icon: "😆", color: "#FF69B4" },
-  { label: "嬉しい", icon: "😊", color: "#FFB6C1" },
-  { label: "楽しい", icon: "😄", color: "#FFA07A" },
-  { label: "安心", icon: "😌", color: "#90EE90" },
-  { label: "普通", icon: "😐", color: "#D3D3D3" },
-  { label: "疲れた", icon: "😮‍💨", color: "#B0C4DE" },
-  { label: "悲しい", icon: "😢", color: "#6495ED" },
-  { label: "不安", icon: "😟", color: "#FF6347" },
-  { label: "怒り", icon: "😡", color: "#DC143C" },
-  { label: "最悪", icon: "😖", color: "#8B0000" },
-  { label: "その他", icon: "❔", color: "#C0C0C0" },
-];
+    useEffect(() => {
+        const fetchDiaryData = async () => {
+            try {
+                const res = await fetch("/api/report");
+                if (!res.ok) throw new Error("APIエラー");
+                const { data } = await res.json();
 
-// デモ日記データ（scoreは数字、weatherとmoodはラベル）
-const demoDiaryData = [
-  { date: "2025-08-01", score: 5, weather: "晴れ", mood: "楽しい" },
-  { date: "2025-08-02", score: 4, weather: "くもり", mood: "嬉しい" },
-  { date: "2025-08-03", score: 3, weather: "雨", mood: "疲れた" },
-  { date: "2025-08-04", score: 2, weather: "雷", mood: "悲しい" },
-  { date: "2025-08-05", score: 1, weather: "雪", mood: "不安" },
-  { date: "2025-08-06", score: 3, weather: "晴れ", mood: "楽しい" },
-  { date: "2025-08-07", score: 4, weather: "風", mood: "安心" },
-];
+                console.log("APIからのデータ:",data);
 
-// 割合を計算する関数
-function calcRatio(data: any[], options: any[], key: string) {
-  const totalCount = data.length;
-  const counts: Record<string, number> = {};
-  options.forEach((opt) => (counts[opt.label] = 0));
-  data.forEach((d) => {
-    if (d[key] in counts) counts[d[key]]++;
-    else counts["その他"]++;
-  });
+                if (!data || data.length === 0) {
+                    setChartData([]);
+                    return;
+                }
 
-  // 割合（%）
-  const ratioData: Record<string, number> = {};
-  options.forEach((opt) => {
-    ratioData[opt.label] = totalCount === 0 ? 0 : (counts[opt.label] / totalCount) * 100;
-  });
-  return ratioData;
-}
+                // 満足度集計
+                const counts = [0, 0, 0, 0, 0];
+                let totalScore = 0;
+                data.forEach((d: { score: string | number }) => {
+                    const score = Number(d.score);
+                    if (score >= 1 && score <= 5)
+                        counts[score - 1]++;
+                        totalScore += score;
+                });
+                setChartData(
+                    counts.map((count, i) => ({
+                        score: i + 1,
+                        percentage: (count / data.length) * 100,
+                    }))
+                );
 
-export default function DiaryGraphs() {
-  // 満足度の日付推移（折れ線グラフ）
-  const lineData = demoDiaryData.map(({ date, score }) => ({ date, score }));
+                setAverage(totalScore / data.length); //平均スコア
 
-  // 天気と感情の割合データ
-  const weatherRatio = calcRatio(demoDiaryData, weatherOptions, "weather");
-  const moodRatio = calcRatio(demoDiaryData, emotionOptions, "mood");
+                // 項目集計用関数
+                const countOptions = (options: string[], key: keyof typeof data[0]) =>
+                    options.map(opt => ({
+                        name: opt,
+                        value: data.filter((d: any) => d[key] === opt).length,
+                    }));
 
-  // 積み上げ棒グラフ用データ（1行にまとめる）
-  const weatherStackData = weatherOptions.reduce((acc, opt) => {
-    acc[opt.label] = weatherRatio[opt.label];
-    return acc;
-  }, {} as Record<string, number>);
+                setExtraCharts({
+                    weather: countOptions(["晴れ", "曇り", "雨", "雪"], "weather"),
+                    people: countOptions(["家族", "友人", "同僚", "一人"], "people"),
+                    hobby: countOptions(["スポーツ", "読書", "音楽", "ゲーム"], "hobby"),
+                    emotion: countOptions(["嬉しい", "悲しい", "怒り", "楽しい"], "mood"),
+                });
 
-  const moodStackData = emotionOptions.reduce((acc, opt) => {
-    acc[opt.label] = moodRatio[opt.label];
-    return acc;
-  }, {} as Record<string, number>);
+                console.log("集計後:", {
+                    weather: countOptions(["晴れ", "曇り", "雨", "雪"], "weather"),
+                    people: countOptions(["家族", "友人", "同僚", "一人"], "people"),
+                    hobby: countOptions(["スポーツ", "読書", "音楽", "ゲーム"], "hobby"),
+                    emotion: countOptions(["嬉しい", "悲しい", "怒り", "楽しい"], "mood"),
+                });
 
-  return (
-    <div style={{ maxWidth: 900, margin: "auto", padding: 20 }}>
-      <h2>満足度の推移（折れ線グラフ）</h2>
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={lineData} margin={{ top: 20, bottom: 20 }}>
-          <CartesianGrid stroke="#ccc" />
-          <XAxis dataKey="date" />
-          <YAxis domain={[1, 5]} allowDecimals={false} />
-          <Tooltip />
-          <Line type="monotone" dataKey="score" stroke="#a4c3a6" strokeWidth={3} />
-        </LineChart>
-      </ResponsiveContainer>
 
-      <h2 style={{ marginTop: 40 }}>天気の割合（帯グラフ）</h2>
-      <ResponsiveContainer width="100%" height={60}>
-        <BarChart
-          data={[weatherStackData]}
-          layout="vertical"
-          margin={{ left: 20, right: 20 }}
-          stackOffset="expand"
-        >
-          <XAxis type="number" hide domain={[0, 1]} />
-          <YAxis type="category" dataKey="" hide />
-          <Tooltip formatter={(value: number) => `${value.toFixed(1)}%`} />
-          {weatherOptions.map((opt) => (
-            <Bar
-              key={opt.label}
-              dataKey={opt.label}
-              stackId="a"
-              fill={opt.color}
-              isAnimationActive={false}
-              name={`${opt.icon} ${opt.label}`}
-            />
-          ))}
-          <Legend />
-        </BarChart>
-      </ResponsiveContainer>
 
-      <h2 style={{ marginTop: 40 }}>感情の割合（帯グラフ）</h2>
-      <ResponsiveContainer width="100%" height={60}>
-        <BarChart
-          data={[moodStackData]}
-          layout="vertical"
-          margin={{ left: 20, right: 20 }}
-          stackOffset="expand"
-        >
-          <XAxis type="number" hide domain={[0, 1]} />
-          <YAxis type="category" dataKey="" hide />
-          <Tooltip formatter={(value: number) => `${value.toFixed(1)}%`} />
-          {emotionOptions.map((opt) => (
-            <Bar
-              key={opt.label}
-              dataKey={opt.label}
-              stackId="a"
-              fill={opt.color}
-              isAnimationActive={false}
-              name={`${opt.icon} ${opt.label}`}
-            />
-          ))}
-          <Legend />
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
-  );
+            } catch (err) {
+                console.error("データ取得エラー:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDiaryData();
+    }, []);
+
+    if (loading) return <p>読み込み中...</p>;
+    if (chartData.length === 0) return <p>この月のデータがありません。</p>;
+
+    return (
+        <div style={{ maxWidth: 900, margin: "auto", padding: 20 }}>
+            {/* 満足度 */}
+            <h2>今月の満足度割合</h2>
+            <p>平均スコア: {average.toFixed(1)}</p> {/* ここで平均を表示 */}
+            <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={chartData} margin={{ top: 30, right: 30, bottom: 50, left: 30 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                        dataKey="score"
+                        height={50}
+                        label={{ value: "スコア", position: "outsideBottom", offset: 0 }}
+                    />
+                    <YAxis unit="%" label={{ value: "割合", angle: -90, position: "insideLeft" }} />
+                    <Tooltip formatter={(value: number) => `${value.toFixed(1)}%`} />
+                    <Legend />
+                    <Bar dataKey="percentage" fill="#82ca9d" name="割合" />
+                </BarChart>
+            </ResponsiveContainer>
+
+            {/* 円グラフたち */}
+            <h2 style={{ marginTop: 40 }}>今月の各項目</h2>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 30 }}>
+                {[
+                    { key: "weather", title: "天気" },
+                    { key: "people", title: "一緒にいた人" },
+                    { key: "hobby", title: "趣味" },
+                    { key: "emotion", title: "感情" },
+                ].map(({ key, title }) => (
+                    <div key={key}>
+                        <h3>{title}</h3>
+                        <ResponsiveContainer width="100%" height={250}>
+                            <PieChart>
+                                <Pie
+                                    data={extraCharts[key].map(entry => ({
+                                        ...entry,
+                                        percentage: ((entry.value / extraCharts[key].reduce((sum, e) => sum + e.value, 0)) * 100),
+                                    }))}
+                                    cx="50%"
+                                    cy="50%"
+                                    outerRadius={80}
+                                    fill="#8884d8"
+                                    dataKey="value"
+                                    labelLine={true}
+                                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`} // ラベルは外側
+                                >
+                                    {extraCharts[key]?.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    ))}
+                                </Pie>
+                                <Tooltip formatter={(value: number, name: string) => {
+                                    const percent = (value / extraCharts[key].reduce((sum, e) => sum + e.value, 0)) * 100;
+                                    return [`${percent.toFixed(1)}%`, name];
+                                }} />
+                                <Legend />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
 }

@@ -31,6 +31,7 @@ export default function LoginModal({ onClose, onRegister }: LoginModalProps) {
     } else {
       alert("ログイン成功！");
       onClose();
+      router.push("/home");
       window.location.reload();
     }
   };

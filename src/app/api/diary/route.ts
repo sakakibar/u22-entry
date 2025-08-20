@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import {prisma} from '@/lib/prisma';
 
 export async function PUT(req: NextRequest) {
   try {
@@ -38,7 +38,12 @@ export async function DELETE(req: NextRequest) {
     if (!diaryID) {
       return NextResponse.json({ success: false, error: 'diaryID が必要です' }, { status: 400 });
     }
+    //先に音楽の削除
+    await prisma.musics.deleteMany({
+      where: { diaryID },
+    });
 
+    //その後日記の削除
     await prisma.diary.delete({
       where: { diaryID },
     });

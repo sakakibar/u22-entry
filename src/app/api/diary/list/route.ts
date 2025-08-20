@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import {prisma} from '@/lib/prisma';
 import { getServerSession } from "next-auth/next"; // next-auth/nextが正しいです
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
-export async function GET(req: Response) {
-    // セッションを取得 (reqを渡す)
-    const session = await getServerSession(authOptions); // 型によっては型アサーション
+export async function GET(req: NextRequest) {
+    const session = await getServerSession(authOptions);
 
     if (!session?.user?.userID) {
         return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
@@ -14,10 +13,8 @@ export async function GET(req: Response) {
     const userID = session.user.userID;
 
     try {
-        const diaries = await prisma.diary.findMany({
-            where: {
-                poster:userID,  // ここでログインユーザーのみに絞る
-            },
+        const diaries = await prisma.Diary.findMany({
+            where: { poster: userID },
             select: {
                 diaryID: true,
                 title: true,
@@ -30,9 +27,7 @@ export async function GET(req: Response) {
                 imageUrl: true,
                 created_at: true,
             },
-            orderBy: {
-                created_at: 'desc',
-            },
+            orderBy: { created_at: 'desc' },
         });
 
         return NextResponse.json(diaries);
