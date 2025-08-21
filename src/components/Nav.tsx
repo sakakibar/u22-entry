@@ -58,26 +58,6 @@ export const Nav = () => {
               Calendar
             </Link>
           </li>
-          <li className={`${styles.li} ${pathname === "/tags" ? styles.active : ""}`}>
-            <Link href="/tags" className={styles.linkContent}>
-              {/* タグ検索アイコン（ラベル風） */}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className={styles.icon}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-                width={20}
-                height={20}
-                aria-hidden="true"
-              >
-                <path d="M3 7a2 2 0 0 1 2-2h4l9 9a2 2 0 0 1 0 2.83l-4.17 4.17a2 2 0 0 1-2.83 0L3 11V7z" />
-                <circle cx="7.5" cy="7.5" r="1.5" />
-              </svg>
-              TagSearch
-            </Link>
-          </li>
           <li className={`${styles.li} ${pathname === "/music-list" ? styles.active : ""}`}>
             <Link href="/music-list" className={styles.linkContent}>
               {/* 音符アイコン */}

@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import styles from "./MusicList.module.css"; // ← CSSファイルを読み込み
+import Image from "next/image";
+import styles from "./MusicList.module.css";
 
 export default function MusicListPage() {
     const [musics, setMusics] = useState<any[]>([]);
@@ -37,17 +38,17 @@ export default function MusicListPage() {
                     musics.map((music) => (
                         <li key={music.musicID} className={styles.item}>
                             {/* サムネイル */}
-                            <img
+                            <Image
                                 src={music.diary?.imageUrl || "/music.png"}
                                 alt="サムネ"
+                                width={100}
+                                height={100}
                                 className={styles.thumbnail}
                             />
                             {/* 曲タイトル */}
-                            <span className={styles.title}>{music.title}</span>
-                            {/* アイコン（例：お気に入りボタンなど将来追加用） */}
-                            <div className={styles.icons}>
-                                {/* ここにSVGやボタンを入れる */}
-                            </div>
+                            <span className={styles.title}>
+                                {music.diary?.title || music.title}
+                            </span>
                             {/* 音楽プレイヤー */}
                             <audio controls src={music.music_url} className={styles.audio} />
                         </li>

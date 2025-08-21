@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import {prisma} from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 
 export async function PUT(req: NextRequest) {
   try {
@@ -38,12 +38,13 @@ export async function DELETE(req: NextRequest) {
     if (!diaryID) {
       return NextResponse.json({ success: false, error: 'diaryID が必要です' }, { status: 400 });
     }
-    //先に音楽の削除
+
+    // 先に音楽の削除
     await prisma.musics.deleteMany({
       where: { diaryID },
     });
 
-    //その後日記の削除
+    // その後日記の削除
     await prisma.diary.delete({
       where: { diaryID },
     });
@@ -59,7 +60,7 @@ export async function DELETE(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { poster, title, content, score, weather, people, hobby, mood, imageUrl } = await req.json();
+    const { poster, title, content, score, weather, people, hobby, mood, imageUrl, created_at } = await req.json();
 
     console.log('poster:', poster);
 
@@ -70,26 +71,35 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 日付取得（0時に丸め）
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    if (!created_at) {
+      return NextResponse.json(
+        { success: false, error: 'created_at が必要です' },
+        { status: 400 }
+      );
+    }
 
-    // 今日の投稿があるか確認
+    // 選択日を UTC 0時で丸めて判定
+    const dateParam = new Date(created_at);
+    const start = new Date(dateParam);
+    start.setUTCHours(0, 0, 0, 0);
+
+    const end = new Date(start);
+    end.setUTCDate(end.getUTCDate() + 1);
+
+    // 選択日で既存日記確認
     const existingDiary = await prisma.diary.findFirst({
       where: {
         user: { userID: poster },
         created_at: {
-          gte: today,
-          lt: tomorrow,
+          gte: start,
+          lt: end,
         },
       },
     });
 
     if (existingDiary) {
       return NextResponse.json(
-          { success: false, error: '今日はすでに日記を登録済みです。' },
+          { success: false, error: 'この日はすでに日記を登録済みです。' },
           { status: 400 }
       );
     }
@@ -105,6 +115,7 @@ export async function POST(req: NextRequest) {
         hobby,
         mood,
         imageUrl,
+        created_at: dateParam,
         user: {
           connect: { userID: poster },
         },

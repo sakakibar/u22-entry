@@ -31,7 +31,6 @@ export const Calendar = ({ onDateSelect }: CalendarProps): JSX.Element => {
         fetch("/api/diary/list")
             .then((res) => res.json())
             .then((data) => {
-                // ✅ 配列か確認してから処理する
                 const diaries = Array.isArray(data)
                     ? data
                     : Array.isArray(data.diaries)
@@ -43,7 +42,7 @@ export const Calendar = ({ onDateSelect }: CalendarProps): JSX.Element => {
                 }
 
                 const diaryEvents = diaries.map((item: any) => ({
-                    title: "📖",
+                    title: item.mood?.icon || "📖",
                     date: new Date(item.created_at).toISOString().split("T")[0],
                     display: "auto",
                 }));

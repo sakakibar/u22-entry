@@ -13,31 +13,10 @@
   color: #666;
 }
 
-.list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.item {
-  margin-bottom: 20px;
-}
-
-.musicTitle {
-  font-weight: bold;
-  margin: 0 0 0.5rem 0;
-}
-
-.audioPlayer {
-  width: 100%;
-  margin: 0.5rem 0;
-}
-
 .date {
   font-size: 0.8em;
   color: #666;
 }
-
 
 /* セクション全体 */
 .section {
@@ -72,14 +51,15 @@
 .item {
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 1rem; /* 最後に調整したgapを優先 */
   padding: 0.75rem 2rem;
   border-bottom: 1px dashed #544739;
+  margin-bottom: 20px; /* 元のmargin-bottomを保持 */
 }
 
 /* サムネイル画像 */
 .thumbnail {
-  width: 80px;
+  flex: 0 0 80px; /* 幅80pxで縮まらず拡大もしない */
   height: 80px;
   object-fit: cover;
   border-radius: 3px;
@@ -87,8 +67,9 @@
 
 /* 曲タイトル */
 .title {
-  flex-grow: 1;
+  flex: 1;           /* 残りのスペースをすべて使う */
   font-size: 1.2rem;
+  min-width: 150px;  /* 小さすぎないように最低幅を設定 */
 }
 
 /* アイコンの並び */
@@ -119,6 +100,19 @@
 
 /* オーディオプレイヤー */
 .audio {
+  flex: 0 0 300px;
+  max-width: 40%;
   margin-top: 0.5rem;
+}
+
+/* 音楽タイトル（元のmusicTitle） */
+.musicTitle {
+  font-weight: bold;
+  margin: 0 0 0.5rem 0;
+}
+
+/* オーディオプレイヤー（元のaudioPlayer） */
+.audioPlayer {
   width: 100%;
+  margin: 0.5rem 0;
 }

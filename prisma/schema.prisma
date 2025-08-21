@@ -10,7 +10,7 @@ datasource db {
 
 model users {
   userID     String   @id @default(cuid())
-  auth_id    String   @unique
+  auth_id    String   @unique @default(cuid())
   username   String
   mail       String   @unique
   password   String
@@ -28,10 +28,10 @@ model Diary {
   poster     String
   title      String
   score      String?
-  weather    String?
-  people     String?
-  hobby      String?
-  mood       String?
+  weather    Json?
+  people     Json?
+  hobby      Json?
+  mood       Json?
   content    String
   imageUrl   String? //画像URL
   created_at DateTime @default(now())
