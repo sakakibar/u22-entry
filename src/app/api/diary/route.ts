@@ -31,10 +31,10 @@ export async function PUT(req: NextRequest) {
         title,
         content,
         score,
-        weather, // PrismaのJson型なのでそのままOK
-        people,
-        hobby,
-        mood,
+        weather: JSON.stringify(weather),
+        people: JSON.stringify(people),
+        hobby: JSON.stringify(hobby),
+        mood: JSON.stringify(mood),
         imageUrl,
       },
     });

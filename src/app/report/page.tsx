@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import {
     BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, CartesianGrid,
     PieChart, Pie, Cell
@@ -14,15 +15,22 @@ const hobbyOptions = ["スポーツ", "読書", "音楽", "ゲーム", "料理",
 const emotionOptions = ["最高", "嬉しい", "楽しい", "安心", "普通", "疲れた", "悲しい", "不安", "怒り", "最悪", "その他"];
 
 export default function DiarySatisfactionReport() {
+    const { data: session, status } = useSession();
     const [chartData, setChartData] = useState<{ score: number; percentage: number }[]>([]);
     const [extraCharts, setExtraCharts] = useState<{ [key: string]: { name: string; value: number }[] }>({});
     const [loading, setLoading] = useState(true);
     const [average, setAverage] = useState(0);
 
     useEffect(() => {
+        if (status !== "authenticated" || !session?.user?.userID) {
+            setLoading(false);
+            return;
+        }
+
         const fetchDiaryData = async () => {
             try {
-                const res = await fetch("/api/report");
+                const userID = session.user.userID;
+                const res = await fetch(`/api/report?userID=${userID}`);
                 if (!res.ok) throw new Error("APIエラー");
                 const { data } = await res.json();
 
@@ -71,13 +79,12 @@ export default function DiarySatisfactionReport() {
         };
 
         fetchDiaryData();
-    }, []);
+    }, [session, status]);
 
     if (loading) return <p>読み込み中...</p>;
     if (chartData.length === 0) return <p>この月のデータがありません。</p>;
 
     // カスタムLegend（全項目表示）
-    // 横並びLegend
     const renderLegend = (data: { name: string; value: number }[]) => {
         return (
             <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", justifyContent: "center" }}>
@@ -91,13 +98,12 @@ export default function DiarySatisfactionReport() {
         );
     };
 
-
     return (
         <div style={{ maxWidth: 900, margin: "auto", padding: 20 }}>
             {/* 満足度 */}
             <h2>今月の満足度割合</h2>
             <p>平均スコア: {average.toFixed(1)}</p>
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={400}>
                 <BarChart data={chartData} margin={{ top: 30, right: 30, bottom: 50, left: 30 }}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="score" height={100} label={{ value: "スコア", position: "outsideBottom", offset: 0 }} />
@@ -119,33 +125,30 @@ export default function DiarySatisfactionReport() {
                 ].map(({ key, title }) => (
                     <div key={key}>
                         <h3>{title}</h3>
-                        <ResponsiveContainer width="100%" height={450}>
+                        <ResponsiveContainer width="115%" height={450}>
                             <PieChart>
-                                {/* 円グラフはvalue>0のみ描画 */}
                                 <Pie
-                                    data={extraCharts[key].filter(entry => entry.value > 0)}
+                                    data={extraCharts[key]}
                                     cx="50%"
                                     cy="50%"
                                     outerRadius={80}
                                     fill="#8884d8"
                                     dataKey="value"
-                                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
+                                    label={({ name, percent, value }) => value > 0 ? `${name}: ${(percent * 100).toFixed(1)}%` : ""}
                                 >
-                                    {extraCharts[key]
-                                        .filter(entry => entry.value > 0)
-                                        .map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                        ))}
+                                    {extraCharts[key].map((entry, index) => (
+                                        <Cell
+                                            key={`cell-${index}`}
+                                            fill={entry.value > 0 ? COLORS[index % COLORS.length] : "#eee"} // 0は薄い灰色
+                                        />
+                                    ))}
                                 </Pie>
-
                                 <Tooltip formatter={(value: number, name: string) => {
-                                    const total = extraCharts[key].reduce((sum, e) => sum + e.value, 0);
+                                    const total = extraCharts[key]?.reduce((sum, e) => sum + e.value, 0) || 0;
                                     const percent = total > 0 ? (value / total) * 100 : 0;
                                     return [`${percent.toFixed(1)}%`, name];
                                 }} />
-
-                                {/* カスタムLegendで全項目表示 */}
-                                <Legend content={() => renderLegend(extraCharts[key])} />
+                                <Legend content={() => renderLegend(extraCharts[key])}/>
                             </PieChart>
                         </ResponsiveContainer>
                     </div>

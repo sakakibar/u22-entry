@@ -8,11 +8,7 @@ import DiaryModal from "../../components/DiaryModal";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-/* 今日の評価 */
-type StarDisplayProps = {
-  value: number;
-  max?: number;
-};
+type StarDisplayProps = { value: number; max?: number };
 
 export function StarDisplay({ value, max = 5 }: StarDisplayProps) {
   return (
@@ -35,7 +31,7 @@ export function StarDisplay({ value, max = 5 }: StarDisplayProps) {
   );
 }
 
-type DiaryData = {
+export type DiaryData = {
   diaryID: string;
   title: string;
   content: string;
@@ -57,31 +53,15 @@ export default function HomePage() {
   const [diaryData, setDiaryData] = useState<DiaryData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const router = useRouter();
   const [diaryList, setDiaryList] = useState<DiaryData[]>([]);
-
+  const [modalDate, setModalDate] = useState<string>(new Date().toISOString().slice(0, 10));
 
   const normalizeField = (field: any) => {
     if (!field) return null;
     if (typeof field === "string") return { label: field, icon: "❔" };
     return field;
   };
-
-  const togglePlay = () => {
-    if (!audioRef.current) return;
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play();
-    }
-    setIsPlaying(!isPlaying);
-  };
-
-  const [modalDate, setModalDate] = useState<string>(
-      new Date().toISOString().slice(0, 10)
-  );
 
   const openModal = () => {
     const today = new Date();
@@ -102,9 +82,12 @@ export default function HomePage() {
         body: JSON.stringify({ diaryID }),
       });
       const result = await res.json();
+
       if (result.success) {
         alert("日記を削除しました");
         setDiaryData(null);
+        setDiaryList((prev) => prev.filter((d) => d.diaryID !== diaryID));
+        setSelectedDate(null);
       } else {
         alert("削除に失敗しました: " + result.error);
       }
@@ -119,6 +102,7 @@ export default function HomePage() {
     setIsModalOpen(true);
   };
 
+  // 認証チェック
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/");
@@ -132,7 +116,6 @@ export default function HomePage() {
         const res = await fetch("/api/diary/list");
         if (!res.ok) throw new Error("日記一覧取得失敗");
         const data = await res.json();
-        console.log("全日記一覧:", data); // ← フロントで確認
         setDiaryList(data);
       } catch (err) {
         console.error("日記一覧取得エラー:", err);
@@ -157,20 +140,14 @@ export default function HomePage() {
         if (!res.ok) throw new Error("データ取得失敗");
         const data = await res.json();
 
-        console.log("取得した日記一覧:", data);
-
         const normalizeDate = (input: string | Date) => {
           const d = new Date(input);
-          return d.toISOString().slice(0, 10); // yyyy-mm-dd
+          return d.toISOString().slice(0, 10);
         };
 
         const matched = data.find((d: any) => normalizeDate(d.created_at) === selectedDate);
-        console.log("選択日と一致した日記:", matched);
 
         if (matched) {
-          // musics が undefined の場合は空配列
-          const musics = matched.musics ?? [];
-
           setDiaryData({
             diaryID: matched.diaryID,
             title: matched.title,
@@ -182,7 +159,7 @@ export default function HomePage() {
             mood: normalizeField(matched.mood),
             created_at: matched.created_at,
             imageUrl: matched.imageUrl,
-            musics: musics,
+            musics: matched.musics ?? [],
           });
         } else {
           setDiaryData(null);
@@ -197,7 +174,7 @@ export default function HomePage() {
     };
 
     fetchData();
-  }, [selectedDate]);
+  }, [selectedDate, diaryList]); // ← diaryList を依存配列に追加して即時反映
 
   return (
       <main className={styles.pageWrapper}>
@@ -207,7 +184,7 @@ export default function HomePage() {
 
         <div className={styles.mainContent}>
           <div className={styles.calendarSection}>
-            <Calendar onDateSelect={setSelectedDate} />
+            <Calendar onDateSelect={setSelectedDate} diaryList={diaryList} />
 
             {isModalOpen && (
                 <DiaryModal
@@ -216,17 +193,24 @@ export default function HomePage() {
                     initialData={editingDiary}
                     diaryList={diaryList}
                     onUpdate={(updatedDiary) => {
-                      setDiaryData(updatedDiary);
                       setEditingDiary(null);
                       setIsModalOpen(false);
 
+                      // diaryList 更新 → カレンダーに即時反映
+                      setDiaryList((prev) => {
+                        const index = prev.findIndex((d) => d.diaryID === updatedDiary.diaryID);
+                        if (index >= 0) {
+                          const newList = [...prev];
+                          newList[index] = updatedDiary;
+                          return newList;
+                        } else {
+                          return [...prev, updatedDiary];
+                        }
+                      });
+
+                      // 選択日を再セットして詳細も再取得
                       const date = updatedDiary.created_at?.slice(0, 10);
-                      if (date) {
-                        setSelectedDate(date);
-                      } else if (selectedDate) {
-                        setSelectedDate(null);
-                        setTimeout(() => setSelectedDate(selectedDate), 0);
-                      }
+                      if (date) setSelectedDate(date);
                     }}
                 />
             )}
@@ -252,9 +236,6 @@ export default function HomePage() {
                                       width={600}
                                       height={400}
                                       className={styles.diaryImage}
-                                      onError={() => {
-                                        console.error("画像の読み込みに失敗:", diaryData.imageUrl);
-                                      }}
                                   />
                                 </div>
                             )}
@@ -269,7 +250,6 @@ export default function HomePage() {
                             ) : (
                                 <p>音楽は登録されていません</p>
                             )}
-
 
                             <div className={styles.detailItem}>
                               <span className={styles.label}>満足度</span>

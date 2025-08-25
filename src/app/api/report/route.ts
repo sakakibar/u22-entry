@@ -1,22 +1,30 @@
+// src/app/api/report/route.ts
 import { NextResponse } from "next/server";
 import supabaseServer from "@/lib/supabaseServer";
 
-export async function GET() {
+export async function GET(req: Request) {
     try {
-        // 今月の範囲を計算
-        const now = new Date();
-        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-        const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
+        // クエリパラメータから userID を取得
+        const { searchParams } = new URL(req.url);
+        const userID = searchParams.get("userID");
+        if (!userID) return NextResponse.json({ error: "userID が指定されていません" }, { status: 400 });
 
-        // RPCで1か月分のデータ取得
+        // 今月の範囲
+        const now = new Date();
+        const firstDayISO = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+        const lastDayISO = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
+
+        console.log("userID:", userID, "firstDayISO:", firstDayISO, "lastDayISO:", lastDayISO);
+
+        // RPC 呼び出し（引数順に注意）
         const { data, error } = await supabaseServer.rpc("get_diary_in_range", {
-            diary_date_start: firstDay,
-            diary_date_end: lastDay,
-            user_id: "cmep7oebm000ejp4cedef8pzj", // 実際はセッションから取得
+            diary_date_start: firstDayISO,
+            diary_date_end: lastDayISO,
+            user_id: userID, // ここで必ず userID を渡す
         });
 
         if (error) {
-            console.error("RPC呼び出しエラー:", error);
+            console.error("RPC 呼び出しエラー:", error);
             return NextResponse.json({ error: "RPCアクセス不可" }, { status: 500 });
         }
 
