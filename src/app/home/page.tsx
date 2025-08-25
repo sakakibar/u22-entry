@@ -8,8 +8,7 @@ import DiaryModal from "../../components/DiaryModal";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-
-{/* 今日の評価 */}
+/* 今日の評価 */
 type StarDisplayProps = {
   value: number;
   max?: number;
@@ -17,25 +16,24 @@ type StarDisplayProps = {
 
 export function StarDisplay({ value, max = 5 }: StarDisplayProps) {
   return (
-    <div style={{ display: "flex", gap: "5px" }}>
-      {Array.from({ length: max }, (_, i) => i + 1).map((num) => (
-        <svg
-          key={num}
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          width="24"
-          height="24"
-          fill={num <= value ? "#FFD700" : "#E0E0E0"}
-          aria-hidden="true"
-          focusable="false"
-        >
-          <path d="M12 2.25c.47 0 .9.28 1.08.71l2.09 4.62 5.01.73c.45.07.83.37.97.8.14.43.02.91-.3 1.23l-3.63 3.55.86 5.01c.08.45-.1.91-.48 1.18-.38.27-.88.3-1.29.08L12 17.77l-4.48 2.36c-.41.22-.91.19-1.29-.08-.38-.27-.56-.73-.48-1.18l.86-5.01-3.63-3.55c-.33-.32-.44-.8-.3-1.23.14-.43.52-.73.97-.8l5.01-.73 2.09-4.62c.18-.43.61-.71 1.08-.71z" />
-        </svg>
-      ))}
-    </div>
+      <div style={{ display: "flex", gap: "5px" }}>
+        {Array.from({ length: max }, (_, i) => i + 1).map((num) => (
+            <svg
+                key={num}
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                width="24"
+                height="24"
+                fill={num <= value ? "#FFD700" : "#E0E0E0"}
+                aria-hidden="true"
+                focusable="false"
+            >
+              <path d="M12 2.25c.47 0 .9.28 1.08.71l2.09 4.62 5.01.73c.45.07.83.37.97.8.14.43.02.91-.3 1.23l-3.63 3.55.86 5.01c.08.45-.1.91-.48 1.18-.38.27-.88.3-1.29.08L12 17.77l-4.48 2.36c-.41.22-.91.19-1.29-.08-.38-.27-.56-.73-.48-1.18l.86-5.01-3.63-3.55c-.33-.32-.44-.8-.3-1.23.14-.43.52-.73.97-.8l5.01-.73 2.09-4.62c.18-.43.61-.71 1.08-.71z" />
+            </svg>
+        ))}
+      </div>
   );
 }
-
 
 type DiaryData = {
   diaryID: string;
@@ -65,6 +63,12 @@ export default function HomePage() {
   const [diaryList, setDiaryList] = useState<DiaryData[]>([]);
 
 
+  const normalizeField = (field: any) => {
+    if (!field) return null;
+    if (typeof field === "string") return { label: field, icon: "❔" };
+    return field;
+  };
+
   const togglePlay = () => {
     if (!audioRef.current) return;
     if (isPlaying) {
@@ -74,16 +78,17 @@ export default function HomePage() {
     }
     setIsPlaying(!isPlaying);
   };
-  const [modalDate, setModalDate] = useState<string>(
-  new Date().toISOString().slice(0, 10)
-);
-const openModal = () => {
-  const today = new Date();
-  const defaultDate = selectedDate ?? today.toISOString().slice(0, 10);
 
-  setModalDate(defaultDate);
-  setIsModalOpen(true);
-};
+  const [modalDate, setModalDate] = useState<string>(
+      new Date().toISOString().slice(0, 10)
+  );
+
+  const openModal = () => {
+    const today = new Date();
+    const defaultDate = selectedDate ?? today.toISOString().slice(0, 10);
+    setModalDate(defaultDate);
+    setIsModalOpen(true);
+  };
 
   const closeModal = () => setIsModalOpen(false);
 
@@ -120,21 +125,23 @@ const openModal = () => {
     }
   }, [status, router]);
 
+  // 日記一覧取得
   useEffect(() => {
     const fetchDiaryList = async () => {
       try {
         const res = await fetch("/api/diary/list");
         if (!res.ok) throw new Error("日記一覧取得失敗");
         const data = await res.json();
-        setDiaryList(data); // ←ここで diaryList にセット
+        console.log("全日記一覧:", data); // ← フロントで確認
+        setDiaryList(data);
       } catch (err) {
         console.error("日記一覧取得エラー:", err);
       }
     };
-
     fetchDiaryList();
   }, []);
 
+  // 選択日の日記取得
   useEffect(() => {
     if (!selectedDate) {
       setDiaryData(null);
@@ -150,48 +157,29 @@ const openModal = () => {
         if (!res.ok) throw new Error("データ取得失敗");
         const data = await res.json();
 
-        const normalizeDate = (input: string | Date): string => {
+        console.log("取得した日記一覧:", data);
+
+        const normalizeDate = (input: string | Date) => {
           const d = new Date(input);
-          const yyyy = d.getFullYear();
-          const mm = String(d.getMonth() + 1).padStart(2, '0');
-          const dd = String(d.getDate()).padStart(2, '0');
-          return `${yyyy}-${mm}-${dd}`;
+          return d.toISOString().slice(0, 10); // yyyy-mm-dd
         };
 
         const matched = data.find((d: any) => normalizeDate(d.created_at) === selectedDate);
+        console.log("選択日と一致した日記:", matched);
 
         if (matched) {
-          let musics = [];
-          try {
-            const musicRes = await fetch(`/api/music?diaryID=${matched.diaryID}`);
-            if (musicRes.ok) {
-              const musicData = await musicRes.json();
-              // 配列に変換してmapで扱えるように
-              musics = Array.isArray(musicData)
-                  ? musicData.map((m: any, idx: number) => ({
-                    musicID: idx.toString(),
-                    title: `音楽 ${idx + 1}`,
-                    music_url: m.music_url,
-                  }))
-                  : [{
-                    musicID: "0",
-                    title: "",
-                    music_url: musicData.music_url,
-                  }];
-            }
-          } catch (err) {
-            console.warn("音楽URLの取得に失敗:", err);
-          }
+          // musics が undefined の場合は空配列
+          const musics = matched.musics ?? [];
 
           setDiaryData({
             diaryID: matched.diaryID,
             title: matched.title,
             content: matched.content,
             score: matched.score,
-            weather: matched.weather,
-            people: matched.people,
-            hobby: matched.hobby,
-            mood: matched.mood,
+            weather: normalizeField(matched.weather),
+            people: normalizeField(matched.people),
+            hobby: normalizeField(matched.hobby),
+            mood: normalizeField(matched.mood),
             created_at: matched.created_at,
             imageUrl: matched.imageUrl,
             musics: musics,
@@ -200,11 +188,8 @@ const openModal = () => {
           setDiaryData(null);
         }
       } catch (err: any) {
-        if (err.message === "unauthorized") {
-          setError("ログインしてください");
-        } else {
-          setError("日記の取得に失敗しました");
-        }
+        console.error("日記取得エラー:", err);
+        setError(err.message || "日記の取得に失敗しました");
         setDiaryData(null);
       } finally {
         setIsLoading(false);
@@ -216,7 +201,6 @@ const openModal = () => {
 
   return (
       <main className={styles.pageWrapper}>
-
         <button className={styles.floatingButton} onClick={openModal}>
           日記を書く
         </button>
@@ -231,7 +215,7 @@ const openModal = () => {
                     createdDate={modalDate}
                     initialData={editingDiary}
                     diaryList={diaryList}
-                    onUpdate={updatedDiary => {
+                    onUpdate={(updatedDiary) => {
                       setDiaryData(updatedDiary);
                       setEditingDiary(null);
                       setIsModalOpen(false);
@@ -275,8 +259,8 @@ const openModal = () => {
                                 </div>
                             )}
 
-                            {diaryData.musics?.length ? (
-                                diaryData.musics.map(music => (
+                            {(diaryData.musics || []).length ? (
+                                (diaryData.musics || []).map((music) => (
                                     <div key={music.musicID}>
                                       <p>{music.title}</p>
                                       <audio controls src={music.music_url}></audio>
@@ -285,52 +269,55 @@ const openModal = () => {
                             ) : (
                                 <p>音楽は登録されていません</p>
                             )}
-                    
+
+
                             <div className={styles.detailItem}>
                               <span className={styles.label}>満足度</span>
                               <span className={styles.value}>
-                                <StarDisplay value={Number(diaryData.score)}/>
-                              </span>
+                        <StarDisplay value={Number(diaryData.score)} />
+                      </span>
                             </div>
+
                             <div className={styles.detailItem}>
                               <span className={styles.label}>天気</span>
                               <span className={styles.value}>
-                                {diaryData.weather ? `${diaryData.weather.icon} ${diaryData.weather.label}` : "-"}
-                              </span>
+                        {diaryData.weather ? `${diaryData.weather.icon} ${diaryData.weather.label}` : "-"}
+                      </span>
                             </div>
+
                             <div className={styles.detailItem}>
                               <span className={styles.label}>誰と過ごした？</span>
                               <span className={styles.value}>
-                                {diaryData.people ? `${diaryData.people.icon} ${diaryData.people.label}` : "-"}
-                              </span>
+                        {diaryData.people ? `${diaryData.people.icon} ${diaryData.people.label}` : "-"}
+                      </span>
                             </div>
+
                             <div className={styles.detailItem}>
                               <span className={styles.label}>何をした？</span>
                               <span className={styles.value}>
-                                {diaryData.hobby ? `${diaryData.hobby.icon} ${diaryData.hobby.label}` : "-"}
-                              </span>
+                        {diaryData.hobby ? `${diaryData.hobby.icon} ${diaryData.hobby.label}` : "-"}
+                      </span>
                             </div>
+
                             <div className={styles.detailItem}>
                               <span className={styles.label}>どんな一日だった？</span>
                               <span className={styles.value}>
-                                {diaryData.mood ? `${diaryData.mood.icon} ${diaryData.mood.label}` : "-"}
-                              </span>
+                        {diaryData.mood ? `${diaryData.mood.icon} ${diaryData.mood.label}` : "-"}
+                      </span>
                             </div>
+
                             <div className={styles.textdetailItem}>
                               <span className={styles.textlabel}>タイトル</span>
                               <span className={styles.textvalue}>{diaryData.title}</span>
                             </div>
+
                             <div className={styles.textdetailItem}>
                               <span className={styles.textlabel}>本文</span>
                               <span className={styles.textvalue}>{diaryData.content}</span>
                             </div>
 
                             <div className={styles.iconButtonGroup}>
-                              <button
-                                  onClick={() => handleEdit(diaryData)}
-                                  aria-label="編集"
-                                  className={styles.iconButton}
-                              >
+                              <button onClick={() => handleEdit(diaryData)} aria-label="編集" className={styles.iconButton}>
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     width="20"
@@ -347,11 +334,7 @@ const openModal = () => {
                                 </svg>
                               </button>
 
-                              <button
-                                  onClick={() => handleDelete(diaryData.diaryID)}
-                                  aria-label="削除"
-                                  className={styles.iconButton}
-                              >
+                              <button onClick={() => handleDelete(diaryData.diaryID)} aria-label="削除" className={styles.iconButton}>
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     width="20"
@@ -373,9 +356,7 @@ const openModal = () => {
                             </div>
                           </>
                       ) : (
-                          <>
-                            <p>この日に登録された日記はありません。</p>
-                          </>
+                          <p>この日に登録された日記はありません。</p>
                       )}
                     </>
                 ) : (

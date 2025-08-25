@@ -1,12 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+/**
+ * 日記を更新
+ */
 export async function PUT(req: NextRequest) {
   try {
-    const { diaryID, title, content, score, weather, people, hobby, mood, imageUrl } = await req.json();
+    const {
+      diaryID,
+      title,
+      content,
+      score,
+      weather,
+      people,
+      hobby,
+      mood,
+      imageUrl,
+    } = await req.json();
 
     if (!diaryID) {
-      return NextResponse.json({ success: false, error: 'diaryID が必要です' }, { status: 400 });
+      return NextResponse.json(
+          { success: false, error: 'diaryID が必要です' },
+          { status: 400 }
+      );
     }
 
     const updated = await prisma.diary.update({
@@ -15,7 +31,7 @@ export async function PUT(req: NextRequest) {
         title,
         content,
         score,
-        weather,
+        weather, // PrismaのJson型なのでそのままOK
         people,
         hobby,
         mood,
@@ -24,45 +40,66 @@ export async function PUT(req: NextRequest) {
     });
 
     return NextResponse.json({ success: true, diary: updated });
-
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ success: false, error: '更新に失敗しました' }, { status: 500 });
+    console.error('PUT Error:', error);
+    return NextResponse.json(
+        { success: false, error: '更新に失敗しました' },
+        { status: 500 }
+    );
   }
 }
 
+/**
+ * 日記を削除
+ */
 export async function DELETE(req: NextRequest) {
   try {
     const { diaryID } = await req.json();
 
     if (!diaryID) {
-      return NextResponse.json({ success: false, error: 'diaryID が必要です' }, { status: 400 });
+      return NextResponse.json(
+          { success: false, error: 'diaryID が必要です' },
+          { status: 400 }
+      );
     }
 
-    // 先に音楽の削除
+    // 関連する音楽を削除
     await prisma.musics.deleteMany({
       where: { diaryID },
     });
 
-    // その後日記の削除
+    // 日記を削除
     await prisma.diary.delete({
       where: { diaryID },
     });
 
     return NextResponse.json({ success: true });
-
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ success: false, error: '削除に失敗しました' }, { status: 500 });
+    console.error('DELETE Error:', error);
+    return NextResponse.json(
+        { success: false, error: '削除に失敗しました' },
+        { status: 500 }
+    );
   }
 }
 
-
+/**
+ * 日記を新規登録
+ */
 export async function POST(req: NextRequest) {
   try {
-    const { poster, title, content, score, weather, people, hobby, mood, imageUrl, created_at } = await req.json();
-
-    console.log('poster:', poster);
+    const {
+      poster,
+      title,
+      content,
+      score,
+      weather,
+      people,
+      hobby,
+      mood,
+      imageUrl,
+      created_at,
+    } = await req.json();
 
     if (!poster || poster.trim() === '') {
       return NextResponse.json(
@@ -73,20 +110,19 @@ export async function POST(req: NextRequest) {
 
     if (!created_at) {
       return NextResponse.json(
-        { success: false, error: 'created_at が必要です' },
-        { status: 400 }
+          { success: false, error: 'created_at が必要です' },
+          { status: 400 }
       );
     }
 
-    // 選択日を UTC 0時で丸めて判定
+    // created_at を UTC 0時で丸めて判定
     const dateParam = new Date(created_at);
     const start = new Date(dateParam);
     start.setUTCHours(0, 0, 0, 0);
-
     const end = new Date(start);
     end.setUTCDate(end.getUTCDate() + 1);
 
-    // 選択日で既存日記確認
+    // 同日の既存日記確認
     const existingDiary = await prisma.diary.findFirst({
       where: {
         user: { userID: poster },
@@ -104,16 +140,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 新規作成
+    // 新規日記登録
     const diary = await prisma.diary.create({
       data: {
         title,
         content,
         score,
-        weather,
-        people,
-        hobby,
-        mood,
+        weather: JSON.stringify(weather),   // ← オブジェクトを文字列に変換
+        people: JSON.stringify(people),
+        hobby: JSON.stringify(hobby),
+        mood: JSON.stringify(mood),
         imageUrl,
         created_at: dateParam,
         user: {
@@ -127,9 +163,11 @@ export async function POST(req: NextRequest) {
       diaryID: diary.diaryID,
       diary,
     });
-
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ success: false, error: '登録失敗' }, { status: 500 });
+    console.error('POST Error:', error);
+    return NextResponse.json(
+        { success: false, error: '登録に失敗しました' },
+        { status: 500 }
+    );
   }
 }

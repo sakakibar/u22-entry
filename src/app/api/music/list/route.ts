@@ -27,6 +27,8 @@ export async function GET(req: Request) {
                 diary: {
                     select: {
                         imageUrl: true, // Diaryモデルのフィールド名
+                        title: true,    //日記のタイトル取得
+
                     },
                 },
             },

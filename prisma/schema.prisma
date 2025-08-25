@@ -33,15 +33,16 @@ model Diary {
   hobby      Json?
   mood       Json?
   content    String
-  imageUrl   String? //画像URL
+  imageUrl   String?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
   user       users    @relation(fields: [poster], references: [userID], onDelete: Cascade)
   musics     musics[]
 
-  @@map("Diary") //大文字テーブル名を表記
+  @@map("Diary")
 }
+
 
 model musics {
   musicID         String   @id @default(cuid())

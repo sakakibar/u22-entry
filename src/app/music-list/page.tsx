@@ -45,9 +45,9 @@ export default function MusicListPage() {
                                 height={100}
                                 className={styles.thumbnail}
                             />
-                            {/* 曲タイトル */}
+                            {/* 日記タイトルを必ず表示 */}
                             <span className={styles.title}>
-                                {music.diary?.title || music.title}
+                                {music.diary?.title ?? "タイトルなし"}
                             </span>
                             {/* 音楽プレイヤー */}
                             <audio controls src={music.music_url} className={styles.audio} />

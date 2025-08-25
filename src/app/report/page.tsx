@@ -1,19 +1,23 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import styles from "./Report.module.css";
 import {
     BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, CartesianGrid,
     PieChart, Pie, Cell
 } from "recharts";
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
+const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#A28BFE", "#FF6699", "#33CC99", "#FF9933", "#66CCFF", "#FF6666"];
+
+const weatherOptions = ["晴れ", "くもり", "雨", "雪", "雷", "風", "霧", "その他"];
+const peopleOptions = ["一人", "家族", "パートナー", "友人", "同僚", "子ども", "ペット", "その他"];
+const hobbyOptions = ["スポーツ", "読書", "音楽", "ゲーム", "料理", "旅行", "映画・ドラマ", "アート・創作", "写真", "アウトドア", "その他"];
+const emotionOptions = ["最高", "嬉しい", "楽しい", "安心", "普通", "疲れた", "悲しい", "不安", "怒り", "最悪", "その他"];
 
 export default function DiarySatisfactionReport() {
     const [chartData, setChartData] = useState<{ score: number; percentage: number }[]>([]);
     const [extraCharts, setExtraCharts] = useState<{ [key: string]: { name: string; value: number }[] }>({});
     const [loading, setLoading] = useState(true);
-    const [average, setAverage] = useState(0); //平均値
+    const [average, setAverage] = useState(0);
 
     useEffect(() => {
         const fetchDiaryData = async () => {
@@ -21,8 +25,6 @@ export default function DiarySatisfactionReport() {
                 const res = await fetch("/api/report");
                 if (!res.ok) throw new Error("APIエラー");
                 const { data } = await res.json();
-
-                console.log("APIからのデータ:",data);
 
                 if (!data || data.length === 0) {
                     setChartData([]);
@@ -32,11 +34,12 @@ export default function DiarySatisfactionReport() {
                 // 満足度集計
                 const counts = [0, 0, 0, 0, 0];
                 let totalScore = 0;
-                data.forEach((d: { score: string | number }) => {
+                data.forEach((d: any) => {
                     const score = Number(d.score);
-                    if (score >= 1 && score <= 5)
+                    if (score >= 1 && score <= 5) {
                         counts[score - 1]++;
                         totalScore += score;
+                    }
                 });
                 setChartData(
                     counts.map((count, i) => ({
@@ -44,31 +47,21 @@ export default function DiarySatisfactionReport() {
                         percentage: (count / data.length) * 100,
                     }))
                 );
+                setAverage(totalScore / data.length);
 
-                setAverage(totalScore / data.length); //平均スコア
-
-                // 項目集計用関数
+                // 円グラフ集計関数
                 const countOptions = (options: string[], key: keyof typeof data[0]) =>
                     options.map(opt => ({
                         name: opt,
-                        value: data.filter((d: any) => d[key] === opt).length,
+                        value: data.filter((d: any) => d[key]?.label === opt).length,
                     }));
 
                 setExtraCharts({
-                    weather: countOptions(["晴れ", "曇り", "雨", "雪"], "weather"),
-                    people: countOptions(["家族", "友人", "同僚", "一人"], "people"),
-                    hobby: countOptions(["スポーツ", "読書", "音楽", "ゲーム"], "hobby"),
-                    emotion: countOptions(["嬉しい", "悲しい", "怒り", "楽しい"], "mood"),
+                    weather: countOptions(weatherOptions, "weather"),
+                    people: countOptions(peopleOptions, "people"),
+                    hobby: countOptions(hobbyOptions, "hobby"),
+                    emotion: countOptions(emotionOptions, "mood"),
                 });
-
-                console.log("集計後:", {
-                    weather: countOptions(["晴れ", "曇り", "雨", "雪"], "weather"),
-                    people: countOptions(["家族", "友人", "同僚", "一人"], "people"),
-                    hobby: countOptions(["スポーツ", "読書", "音楽", "ゲーム"], "hobby"),
-                    emotion: countOptions(["嬉しい", "悲しい", "怒り", "楽しい"], "mood"),
-                });
-
-
 
             } catch (err) {
                 console.error("データ取得エラー:", err);
@@ -83,19 +76,31 @@ export default function DiarySatisfactionReport() {
     if (loading) return <p>読み込み中...</p>;
     if (chartData.length === 0) return <p>この月のデータがありません。</p>;
 
+    // カスタムLegend（全項目表示）
+    // 横並びLegend
+    const renderLegend = (data: { name: string; value: number }[]) => {
+        return (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", justifyContent: "center" }}>
+                {data.map((entry, index) => (
+                    <div key={`legend-${index}`} style={{ color: COLORS[index % COLORS.length], display: "flex", alignItems: "center", gap: "4px" }}>
+                        <span style={{ width: 12, height: 12, backgroundColor: COLORS[index % COLORS.length], display: "inline-block" }}></span>
+                        <span>{entry.name} ({entry.value})</span>
+                    </div>
+                ))}
+            </div>
+        );
+    };
+
+
     return (
         <div style={{ maxWidth: 900, margin: "auto", padding: 20 }}>
             {/* 満足度 */}
             <h2>今月の満足度割合</h2>
-            <p>平均スコア: {average.toFixed(1)}</p> {/* ここで平均を表示 */}
+            <p>平均スコア: {average.toFixed(1)}</p>
             <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={chartData} margin={{ top: 30, right: 30, bottom: 50, left: 30 }}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                        dataKey="score"
-                        height={50}
-                        label={{ value: "スコア", position: "outsideBottom", offset: 0 }}
-                    />
+                    <XAxis dataKey="score" height={100} label={{ value: "スコア", position: "outsideBottom", offset: 0 }} />
                     <YAxis unit="%" label={{ value: "割合", angle: -90, position: "insideLeft" }} />
                     <Tooltip formatter={(value: number) => `${value.toFixed(1)}%`} />
                     <Legend />
@@ -103,7 +108,7 @@ export default function DiarySatisfactionReport() {
                 </BarChart>
             </ResponsiveContainer>
 
-            {/* 円グラフたち */}
+            {/* 円グラフ */}
             <h2 style={{ marginTop: 40 }}>今月の各項目</h2>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 30 }}>
                 {[
@@ -114,30 +119,33 @@ export default function DiarySatisfactionReport() {
                 ].map(({ key, title }) => (
                     <div key={key}>
                         <h3>{title}</h3>
-                        <ResponsiveContainer width="100%" height={250}>
+                        <ResponsiveContainer width="100%" height={450}>
                             <PieChart>
+                                {/* 円グラフはvalue>0のみ描画 */}
                                 <Pie
-                                    data={extraCharts[key].map(entry => ({
-                                        ...entry,
-                                        percentage: ((entry.value / extraCharts[key].reduce((sum, e) => sum + e.value, 0)) * 100),
-                                    }))}
+                                    data={extraCharts[key].filter(entry => entry.value > 0)}
                                     cx="50%"
                                     cy="50%"
                                     outerRadius={80}
                                     fill="#8884d8"
                                     dataKey="value"
-                                    labelLine={true}
-                                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`} // ラベルは外側
+                                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
                                 >
-                                    {extraCharts[key]?.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                    ))}
+                                    {extraCharts[key]
+                                        .filter(entry => entry.value > 0)
+                                        .map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                        ))}
                                 </Pie>
+
                                 <Tooltip formatter={(value: number, name: string) => {
-                                    const percent = (value / extraCharts[key].reduce((sum, e) => sum + e.value, 0)) * 100;
+                                    const total = extraCharts[key].reduce((sum, e) => sum + e.value, 0);
+                                    const percent = total > 0 ? (value / total) * 100 : 0;
                                     return [`${percent.toFixed(1)}%`, name];
                                 }} />
-                                <Legend />
+
+                                {/* カスタムLegendで全項目表示 */}
+                                <Legend content={() => renderLegend(extraCharts[key])} />
                             </PieChart>
                         </ResponsiveContainer>
                     </div>
