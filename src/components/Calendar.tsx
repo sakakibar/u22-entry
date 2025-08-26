@@ -1,57 +1,58 @@
 "use client";
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import interactionPlugin, { DateClickArg } from "@fullcalendar/interaction";
+import jaLocale from "@fullcalendar/core/locales/ja";
+import { useEffect, useRef } from "react";
+import styles from "./styles/Calendar.module.css";
 
-import { useEffect, useState } from "react";
-import '@fullcalendar/common/main.css';
-import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction';
-import jaLocale from '@fullcalendar/core/locales/ja';
-import styles from './styles/Calendar.module.css';
-
+type DiaryEvent = { title: string; date: string };
 type DiaryData = {
     diaryID: string;
     created_at?: string;
-    mood?: { icon: string; label: string };
+    mood?: { label: string; icon: string };
 };
 
-type CalendarProps = {
+interface CalendarProps {
     onDateSelect: (date: string) => void;
     diaryList: DiaryData[];
-};
+}
 
-type DiaryEvent = {
-    title: string;
-    date: string;
-};
+export const Calendar = ({ onDateSelect, diaryList }: CalendarProps) => {
+    const calendarRef = useRef<FullCalendar>(null);
 
-export const Calendar = ({ onDateSelect, diaryList }: CalendarProps): JSX.Element => {
-    const [events, setEvents] = useState<DiaryEvent[]>([]);
-    const [calendarKey, setCalendarKey] = useState(0);
+    useEffect(() => {
+        const calendarApi = calendarRef.current?.getApi();
+        if (!calendarApi) return;
+
+        // 既存イベントをすべて削除
+        calendarApi.removeAllEvents();
+
+        // diaryList からイベントを生成して追加
+        diaryList.forEach((item) => {
+            if (item.created_at) {
+                calendarApi.addEvent({
+                    title: item.mood?.icon || "📖",
+                    date: item.created_at.slice(0, 10),
+                });
+            }
+        });
+    }, [diaryList]);
 
     const handleDateClick = (arg: DateClickArg) => {
         onDateSelect(arg.dateStr);
     };
 
-    useEffect(() => {
-        const diaryEvents = diaryList.map((item) => ({
-            title: item.mood?.icon || "📖",
-            date: item.created_at?.slice(0, 10) || "",
-        }));
-        setEvents(diaryEvents);
-        setCalendarKey(prev => prev + 1); //これで強制レンダリング
-    }, [diaryList]);
-
     return (
         <div className={styles.calendarContainer}>
             <FullCalendar
-                key={calendarKey}
+                ref={calendarRef}
                 plugins={[dayGridPlugin, interactionPlugin]}
                 initialView="dayGridMonth"
                 locales={[jaLocale]}
                 locale="ja"
                 headerToolbar={{ left: "prev", center: "title", right: "next" }}
                 dateClick={handleDateClick}
-                events={events}
                 fixedWeekCount={false}
             />
         </div>
