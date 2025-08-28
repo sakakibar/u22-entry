@@ -40,10 +40,10 @@ export async function GET(req: NextRequest) {
 // 文字列として保存されている場合に JSON 化
         const normalizedDiaries = diaries.map(d => ({
             ...d,
-            weather: d.weather ? JSON.parse(d.weather as string) : null,
-            people: d.people ? JSON.parse(d.people as string) : null,
-            hobby: d.hobby ? JSON.parse(d.hobby as string) : null,
-            mood: d.mood ? JSON.parse(d.mood as string) : null,
+            weather: typeof d.weather === 'string' ? JSON.parse(d.weather) : d.weather,
+            people: typeof d.people === 'string' ? JSON.parse(d.people) : d.people,
+            hobby: typeof d.hobby === 'string' ? JSON.parse(d.hobby) : d.hobby,
+            mood: typeof d.mood === 'string' ? JSON.parse(d.mood) : d.mood,
         }));
 
         return NextResponse.json(normalizedDiaries);

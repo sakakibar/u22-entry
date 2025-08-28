@@ -3,14 +3,13 @@ generator client {
 }
 
 datasource db {
-  provider   = "postgresql"
-  url        = env("DATABASE_URL")
-  directUrl  = env("DIRECT_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model users {
   userID     String   @id @default(cuid())
-  auth_id    String   @unique @default(cuid())
   username   String
   mail       String   @unique
   password   String
@@ -20,7 +19,7 @@ model users {
   bio        String?
   created_at DateTime @default(now())
 
-  diaries    Diary[]  // ここも単数形モデル名に対応
+  diaries Diary[] // ここも単数形モデル名に対応
 }
 
 model Diary {
@@ -37,12 +36,11 @@ model Diary {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  user       users    @relation(fields: [poster], references: [userID], onDelete: Cascade)
-  musics     musics[]
+  user   users    @relation(fields: [poster], references: [userID], onDelete: Cascade)
+  musics musics[]
 
   @@map("Diary")
 }
-
 
 model musics {
   musicID         String   @id @default(cuid())
@@ -52,9 +50,8 @@ model musics {
   parameters      String?
   created_at      DateTime @default(now())
 
-  diaryID         String
-  diary           Diary    @relation(fields: [diaryID], references: [diaryID], onDelete: Cascade)
+  diaryID String
+  diary   Diary  @relation(fields: [diaryID], references: [diaryID], onDelete: Cascade)
 
-  image_url       String? @default("/music-thumbnail.png")
-
+  image_url String? @default("/music-thumbnail.png")
 }
