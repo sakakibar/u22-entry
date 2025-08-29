@@ -1,0 +1,41 @@
+u22 実行手順
+
+■ リポジトリ
+GitHub: https://github.com/sakakibar/u22-entry
+※プライベートアカウントでなく、公開リポジトリです。
+
+
+■ インストール手順
+1. リポジトリをクローン
+   git clone https://github.com/sakakibar/u22-entry.git
+2. プロジェクトディレクトリに移動
+   cd u22-entry
+
+3. 環境変数ファイル (.env) をプロジェクトルートに配置
+      内容例：
+      DATABASE_URL="postgresql://username:password@host:port/dbname"
+      NEXT_PUBLIC_SUPABASE_URL="https://xxxxx.supabase.co"
+      NEXT_PUBLIC_SUPABASE_ANON_KEY="xxxxx"
+
+4. 依存パッケージをインストール
+   npm install
+
+5. Prisma Client を生成
+   npx prisma generate
+
+
+■ 実行方法
+1. 開発サーバーを起動
+   npm run dev
+2. ブラウザでアクセス
+   http://localhost:3000
+3. アプリが起動します。
+
+■ サンプルアカウント（テスト用）
+- メール：test@test.com
+- パスワード：passpasspass
+
+
+■ 備考
+-既存のデータベースに接続して動作確認できます。
+-.envの内容はエントリーフォームから確認してください。
